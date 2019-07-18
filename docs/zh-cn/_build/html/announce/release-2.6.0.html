@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pytest-2.6.0: shorter tracebacks, new warning system, test runner compat &#8212; pytest documentation</title>
+    <link rel="stylesheet" href="../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments_pytest.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="shortcut icon" href="../_static/pytest1favi.ico"/>
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pytest-2.5.2: fixes" href="release-2.5.2.html" />
+    <link rel="prev" title="pytest-2.6.1: fixes and new xfail feature" href="release-2.6.1.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+  
+  
+  
+
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="release-2.5.2.html" title="pytest-2.5.2: fixes"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="release-2.6.1.html" title="pytest-2.6.1: fixes and new xfail feature"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../contents.html">pytest-5.0</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Release announcements</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pytest-2-6-0-shorter-tracebacks-new-warning-system-test-runner-compat">
+<h1>pytest-2.6.0: shorter tracebacks, new warning system, test runner compat<a class="headerlink" href="#pytest-2-6-0-shorter-tracebacks-new-warning-system-test-runner-compat" title="Permalink to this headline">¶</a></h1>
+<p>pytest is a mature Python testing tool with more than a 1000 tests
+against itself, passing on many different interpreters and platforms.</p>
+<p>The 2.6.0 release should be drop-in backward compatible to 2.5.2 and
+fixes a number of bugs and brings some new features, mainly:</p>
+<ul class="simple">
+<li><p>shorter tracebacks by default: only the first (test function) entry
+and the last (failure location) entry are shown, the ones between
+only in “short” format.  Use <code class="docutils literal notranslate"><span class="pre">--tb=long</span></code> to get back the old
+behaviour of showing “long” entries everywhere.</p></li>
+<li><p>a new warning system which reports oddities during collection
+and execution.  For example, ignoring collecting Test* classes with an
+<code class="docutils literal notranslate"><span class="pre">__init__</span></code> now produces a warning.</p></li>
+<li><p>various improvements to nose/mock/unittest integration</p></li>
+</ul>
+<p>Note also that 2.6.0 departs with the “zero reported bugs” policy
+because it has been too hard to keep up with it, unfortunately.
+Instead we are for now rather bound to work on “upvoted” issues in
+the <a class="reference external" href="https://bitbucket.org/pytest-dev/pytest/issues?status=new&amp;status=open&amp;sort=-votes">https://bitbucket.org/pytest-dev/pytest/issues?status=new&amp;status=open&amp;sort=-votes</a>
+issue tracker.</p>
+<p>See docs at:</p>
+<blockquote>
+<div><p><a class="reference external" href="http://pytest.org">http://pytest.org</a></p>
+</div></blockquote>
+<p>As usual, you can upgrade from pypi via:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">pytest</span>
+</pre></div>
+</div>
+<p>Thanks to all who contributed, among them:</p>
+<blockquote>
+<div><p>Benjamin Peterson
+Jurko Gospodnetić
+Floris Bruynooghe
+Marc Abramowitz
+Marc Schlaich
+Trevor Bekolay
+Bruno Oliveira
+Alex Groenholm</p>
+</div></blockquote>
+<p>have fun,
+holger krekel</p>
+<div class="section" id="id1">
+<h2>2.6.0<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>fix issue537: Avoid importing old assertion reinterpretation code by default.
+Thanks Benjamin Peterson.</p></li>
+<li><p>fix issue364: shorten and enhance tracebacks representation by default.
+The new “–tb=auto” option (default) will only display long tracebacks
+for the first and last entry.  You can get the old behaviour of printing
+all entries as long entries with “–tb=long”.  Also short entries by
+default are now printed very similarly to “–tb=native” ones.</p></li>
+<li><p>fix issue514: teach assertion reinterpretation about private class attributes
+Thanks Benjamin Peterson.</p></li>
+<li><p>change -v output to include full node IDs of tests.  Users can copy
+a node ID from a test run, including line number, and use it as a
+positional argument in order to run only a single test.</p></li>
+<li><p>fix issue 475: fail early and comprehensible if calling
+pytest.raises with wrong exception type.</p></li>
+<li><p>fix issue516: tell in getting-started about current dependencies.</p></li>
+<li><p>cleanup setup.py a bit and specify supported versions. Thanks Jurko
+Gospodnetic for the PR.</p></li>
+<li><p>change XPASS colour to yellow rather then red when tests are run
+with -v.</p></li>
+<li><p>fix issue473: work around mock putting an unbound method into a class
+dict when double-patching.</p></li>
+<li><p>fix issue498: if a fixture finalizer fails, make sure that
+the fixture is still invalidated.</p></li>
+<li><p>fix issue453: the result of the pytest_assertrepr_compare hook now gets
+it’s newlines escaped so that format_exception does not blow up.</p></li>
+<li><p>internal new warning system: pytest will now produce warnings when
+it detects oddities in your test collection or execution.
+Warnings are ultimately sent to a new pytest_logwarning hook which is
+currently only implemented by the terminal plugin which displays
+warnings in the summary line and shows more details when -rw (report on
+warnings) is specified.</p></li>
+<li><p>change skips into warnings for test classes with an __init__ and
+callables in test modules which look like a test but are not functions.</p></li>
+<li><p>fix issue436: improved finding of initial conftest files from command
+line arguments by using the result of parse_known_args rather than
+the previous flaky heuristics.  Thanks Marc Abramowitz for tests
+and initial fixing approaches in this area.</p></li>
+<li><p>fix issue #479: properly handle nose/unittest(2) SkipTest exceptions
+during collection/loading of test modules.  Thanks to Marc Schlaich
+for the complete PR.</p></li>
+<li><p>fix issue490: include pytest_load_initial_conftests in documentation
+and improve docstring.</p></li>
+<li><p>fix issue472: clarify that <code class="docutils literal notranslate"><span class="pre">pytest.config.getvalue()</span></code> cannot work
+if it’s triggered ahead of command line parsing.</p></li>
+<li><p>merge PR123: improved integration with mock.patch decorator on tests.</p></li>
+<li><p>fix issue412: messing with stdout/stderr FD-level streams is now
+captured without crashes.</p></li>
+<li><p>fix issue483: trial/py33 works now properly.  Thanks Daniel Grana for PR.</p></li>
+<li><p>improve example for pytest integration with “python setup.py test”
+which now has a generic “-a” or “–pytest-args” option where you
+can pass additional options as a quoted string.  Thanks Trevor Bekolay.</p></li>
+<li><p>simplified internal capturing mechanism and made it more robust
+against tests or setups changing FD1/FD2, also better integrated
+now with pytest.pdb() in single tests.</p></li>
+<li><p>improvements to pytest’s own test-suite leakage detection, courtesy of PRs
+from Marc Abramowitz</p></li>
+<li><p>fix issue492: avoid leak in test_writeorg.  Thanks Marc Abramowitz.</p></li>
+<li><p>fix issue493: don’t run tests in doc directory with <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">test</span></code>
+(use tox -e doctesting for that)</p></li>
+<li><p>fix issue486: better reporting and handling of early conftest loading failures</p></li>
+<li><p>some cleanup and simplification of internal conftest handling.</p></li>
+<li><p>work a bit harder to break reference cycles when catching exceptions.
+Thanks Jurko Gospodnetic.</p></li>
+<li><p>fix issue443: fix skip examples to use proper comparison.  Thanks Alex
+Groenholm.</p></li>
+<li><p>support nose-style <code class="docutils literal notranslate"><span class="pre">__test__</span></code> attribute on modules, classes and
+functions, including unittest-style Classes.  If set to False, the
+test will not be collected.</p></li>
+<li><p>fix issue512: show “&lt;notset&gt;” for arguments which might not be set
+in monkeypatch plugin.  Improves output in documentation.</p></li>
+<li><p>avoid importing “py.test” (an old alias module for “pytest”)</p></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../contents.html">
+              <img class="logo" src="../_static/pytest1.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel"
+        placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+  </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3><a href="../contents.html">Table Of Contents</a></h3>
+
+<ul>
+  <li><a href="../index.html">Home</a></li>
+  <li><a href="../getting-started.html">Install</a></li>
+  <li><a href="../contents.html">Contents</a></li>
+  <li><a href="../reference.html">API Reference</a></li>
+  <li><a href="../example/index.html">Examples</a></li>
+  <li><a href="../customize.html">Customize</a></li>
+  <li><a href="../changelog.html">Changelog</a></li>
+  <li><a href="../contributing.html">Contributing</a></li>
+  <li><a href="../backwards-compatibility.html">Backwards Compatibility</a></li>
+  <li><a href="../py27-py34-deprecation.html">Python 2.7 and 3.4 Support</a></li>
+  <li><a href="../sponsor.html">Sponsor</a></li>
+  <li><a href="../license.html">License</a></li>
+  <li><a href="../contact.html">Contact Channels</a></li>
+</ul>
+  <hr>
+  <ul>
+<li><a class="reference internal" href="#">pytest-2.6.0: shorter tracebacks, new warning system, test runner compat</a><ul>
+<li><a class="reference internal" href="#id1">2.6.0</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../contents.html">Documentation overview</a><ul>
+  <li><a href="index.html">Release announcements</a><ul>
+      <li>Previous: <a href="release-2.6.1.html" title="previous chapter">pytest-2.6.1: fixes and new xfail feature</a></li>
+      <li>Next: <a href="release-2.5.2.html" title="next chapter">pytest-2.5.2: fixes</a></li>
+  </ul></li>
+  </ul></li>
+</ul><h3>Useful Links</h3>
+<ul>
+  <li><a href="https://pypi.org/project/pytest/">pytest @ PyPI</a></li>
+  <li><a href="https://github.com/pytest-dev/pytest/">pytest @ GitHub</a></li>
+  <li><a href="http://plugincompat.herokuapp.com/">3rd party plugins</a></li>
+  <li><a href="https://github.com/pytest-dev/pytest/issues">Issue Tracker</a></li>
+  <li><a href="https://media.readthedocs.org/pdf/pytest/latest/pytest.pdf">PDF Documentation</a>
+</ul>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+  <div class="footer">
+    &copy; Copyright 2015–2019, holger krekel and pytest-dev team.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 2.1.2.
+  </div>
+  
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7597274-13']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+  </body>
+</html>

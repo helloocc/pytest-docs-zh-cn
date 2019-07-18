@@ -1,0 +1,183 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>python testing sprint June 20th-26th 2016 &#8212; pytest documentation</title>
+    <link rel="stylesheet" href="../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments_pytest.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="shortcut icon" href="../_static/pytest1favi.ico"/>
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pytest-2.9.2" href="release-2.9.2.html" />
+    <link rel="prev" title="pytest-3.0.0" href="release-3.0.0.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+  
+  
+  
+
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="release-2.9.2.html" title="pytest-2.9.2"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="release-3.0.0.html" title="pytest-3.0.0"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../contents.html">pytest-5.0</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Release announcements</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="python-testing-sprint-june-20th-26th-2016">
+<h1>python testing sprint June 20th-26th 2016<a class="headerlink" href="#python-testing-sprint-june-20th-26th-2016" title="Permalink to this headline">¶</a></h1>
+<a class="reference internal image-reference" href="../_images/freiburg2.jpg"><img alt="../_images/freiburg2.jpg" src="../_images/freiburg2.jpg" style="width: 400px;" /></a>
+<p>The pytest core group held the biggest sprint
+in its history in June 2016, taking place in the black forest town Freiburg
+in Germany.  In February 2016 we started a <a class="reference external" href="http://igg.me/at/pytest-sprint/x/4034848">funding
+campaign on Indiegogo to cover expenses</a> The page also mentions
+some preliminary topics:</p>
+<ul class="simple">
+<li><p>improving pytest-xdist test scheduling to take into account
+fixture setups and explicit user hints.</p></li>
+<li><p>provide info on fixture dependencies during –collect-only</p></li>
+<li><p>tying pytest-xdist to tox so that you can do “py.test -e py34”
+to run tests in a particular tox-managed virtualenv.  Also
+look into making pytest-xdist use tox environments on
+remote ssh-sides so that remote dependency management becomes
+easier.</p></li>
+<li><p>refactoring the fixture system so more people understand it :)</p></li>
+<li><p>integrating PyUnit setup methods as autouse fixtures.
+possibly adding ways to influence ordering of same-scoped
+fixtures (so you can make a choice of which fixtures come
+before others)</p></li>
+<li><p>fixing bugs and issues from the tracker, really an endless source :)</p></li>
+</ul>
+<div class="section" id="participants">
+<h2>Participants<a class="headerlink" href="#participants" title="Permalink to this headline">¶</a></h2>
+<p>Over 20 participants took part from 4 continents, including employees
+from Splunk, Personalkollen, Cobe.io, FanDuel and Dolby. Some newcomers
+mixed with developers who have worked on pytest since its beginning, and
+of course everyone in between.</p>
+</div>
+<div class="section" id="sprint-organisation-schedule">
+<h2>Sprint organisation, schedule<a class="headerlink" href="#sprint-organisation-schedule" title="Permalink to this headline">¶</a></h2>
+<p>People arrived in Freiburg on the 19th, with sprint development taking
+place on 20th, 21st, 22nd, 24th and 25th. On the 23rd we took a break
+day for some hot hiking in the Black Forest.</p>
+<p>Sprint activity was organised heavily around pairing, with plenty of group
+discusssions to take advantage of the high bandwidth, and lightning talks
+as well.</p>
+</div>
+<div class="section" id="money-funding">
+<h2>Money / funding<a class="headerlink" href="#money-funding" title="Permalink to this headline">¶</a></h2>
+<p>The Indiegogo campaign aimed for 11000 USD and in the end raised over
+12000, to reimburse travel costs, pay for a sprint venue and catering.</p>
+<p>Excess money is reserved for further sprint/travel funding for pytest/tox
+contributors.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../contents.html">
+              <img class="logo" src="../_static/pytest1.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel"
+        placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+  </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3><a href="../contents.html">Table Of Contents</a></h3>
+
+<ul>
+  <li><a href="../index.html">Home</a></li>
+  <li><a href="../getting-started.html">Install</a></li>
+  <li><a href="../contents.html">Contents</a></li>
+  <li><a href="../reference.html">API Reference</a></li>
+  <li><a href="../example/index.html">Examples</a></li>
+  <li><a href="../customize.html">Customize</a></li>
+  <li><a href="../changelog.html">Changelog</a></li>
+  <li><a href="../contributing.html">Contributing</a></li>
+  <li><a href="../backwards-compatibility.html">Backwards Compatibility</a></li>
+  <li><a href="../py27-py34-deprecation.html">Python 2.7 and 3.4 Support</a></li>
+  <li><a href="../sponsor.html">Sponsor</a></li>
+  <li><a href="../license.html">License</a></li>
+  <li><a href="../contact.html">Contact Channels</a></li>
+</ul>
+  <hr>
+  <ul>
+<li><a class="reference internal" href="#">python testing sprint June 20th-26th 2016</a><ul>
+<li><a class="reference internal" href="#participants">Participants</a></li>
+<li><a class="reference internal" href="#sprint-organisation-schedule">Sprint organisation, schedule</a></li>
+<li><a class="reference internal" href="#money-funding">Money / funding</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../contents.html">Documentation overview</a><ul>
+  <li><a href="index.html">Release announcements</a><ul>
+      <li>Previous: <a href="release-3.0.0.html" title="previous chapter">pytest-3.0.0</a></li>
+      <li>Next: <a href="release-2.9.2.html" title="next chapter">pytest-2.9.2</a></li>
+  </ul></li>
+  </ul></li>
+</ul><h3>Useful Links</h3>
+<ul>
+  <li><a href="https://pypi.org/project/pytest/">pytest @ PyPI</a></li>
+  <li><a href="https://github.com/pytest-dev/pytest/">pytest @ GitHub</a></li>
+  <li><a href="http://plugincompat.herokuapp.com/">3rd party plugins</a></li>
+  <li><a href="https://github.com/pytest-dev/pytest/issues">Issue Tracker</a></li>
+  <li><a href="https://media.readthedocs.org/pdf/pytest/latest/pytest.pdf">PDF Documentation</a>
+</ul>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+  <div class="footer">
+    &copy; Copyright 2015–2019, holger krekel and pytest-dev team.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 2.1.2.
+  </div>
+  
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7597274-13']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+  </body>
+</html>

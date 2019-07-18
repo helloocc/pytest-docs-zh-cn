@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pytest-2.3.5: bug fixes and little improvements &#8212; pytest documentation</title>
+    <link rel="stylesheet" href="../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments_pytest.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="shortcut icon" href="../_static/pytest1favi.ico"/>
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pytest-2.3.4: stabilization, more flexible selection via “-k expr”" href="release-2.3.4.html" />
+    <link rel="prev" title="pytest-2.4.0: new fixture features/hooks and bug fixes" href="release-2.4.0.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+  
+  
+  
+
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="release-2.3.4.html" title="pytest-2.3.4: stabilization, more flexible selection via “-k expr”"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="release-2.4.0.html" title="pytest-2.4.0: new fixture features/hooks and bug fixes"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../contents.html">pytest-5.0</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Release announcements</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pytest-2-3-5-bug-fixes-and-little-improvements">
+<h1>pytest-2.3.5: bug fixes and little improvements<a class="headerlink" href="#pytest-2-3-5-bug-fixes-and-little-improvements" title="Permalink to this headline">¶</a></h1>
+<p>pytest-2.3.5 is a maintenance release with many bug fixes and little
+improvements.  See the changelog below for details.  No backward
+compatibility issues are foreseen and all plugins which worked with the
+prior version are expected to work unmodified.   Speaking of which, a
+few interesting new plugins saw the light last month:</p>
+<ul class="simple">
+<li><p>pytest-instafail: show failure information while tests are running</p></li>
+<li><p>pytest-qt: testing of GUI applications written with QT/Pyside</p></li>
+<li><p>pytest-xprocess: managing external processes across test runs</p></li>
+<li><p>pytest-random: randomize test ordering</p></li>
+</ul>
+<p>And several others like pytest-django saw maintenance releases.
+For a more complete list, check out
+<a class="reference external" href="https://pypi.org/search/?q=pytest">https://pypi.org/search/?q=pytest</a></p>
+<p>For general information see:</p>
+<blockquote>
+<div><p><a class="reference external" href="http://pytest.org/">http://pytest.org/</a></p>
+</div></blockquote>
+<p>To install or upgrade pytest:</p>
+<blockquote>
+<div><p>pip install -U pytest # or
+easy_install -U pytest</p>
+</div></blockquote>
+<p>Particular thanks to Floris, Ronny, Benjamin and the many bug reporters
+and fix providers.</p>
+<p>may the fixtures be with you,
+holger krekel</p>
+<div class="section" id="changes-between-2-3-4-and-2-3-5">
+<h2>Changes between 2.3.4 and 2.3.5<a class="headerlink" href="#changes-between-2-3-4-and-2-3-5" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>never consider a fixture function for test function collection</p></li>
+<li><p>allow re-running of test items / helps to fix pytest-reruntests plugin
+and also help to keep less fixture/resource references alive</p></li>
+<li><p>put captured stdout/stderr into junitxml output even for passing tests
+(thanks Adam Goucher)</p></li>
+<li><p>Issue 265 - integrate nose setup/teardown with setupstate
+so it doesn’t try to teardown if it did not setup</p></li>
+<li><p>issue 271 - don’t write junitxml on slave nodes</p></li>
+<li><p>Issue 274 - don’t try to show full doctest example
+when doctest does not know the example location</p></li>
+<li><p>issue 280 - disable assertion rewriting on buggy CPython 2.6.0</p></li>
+<li><p>inject “getfixture()” helper to retrieve fixtures from doctests,
+thanks Andreas Zeidler</p></li>
+<li><p>issue 259 - when assertion rewriting, be consistent with the default
+source encoding of ASCII on Python 2</p></li>
+<li><p>issue 251 - report a skip instead of ignoring classes with init</p></li>
+<li><p>issue250 unicode/str mixes in parametrization names and values now works</p></li>
+<li><p>issue257, assertion-triggered compilation of source ending in a
+comment line doesn’t blow up in python2.5 (fixed through py&gt;=1.4.13.dev6)</p></li>
+<li><p>fix –genscript option to generate standalone scripts that also
+work with python3.3 (importer ordering)</p></li>
+<li><p>issue171 - in assertion rewriting, show the repr of some
+global variables</p></li>
+<li><p>fix option help for “-k”</p></li>
+<li><p>move long description of distribution into README.rst</p></li>
+<li><p>improve docstring for metafunc.parametrize()</p></li>
+<li><p>fix bug where using capsys with pytest.set_trace() in a test
+function would break when looking at capsys.readouterr()</p></li>
+<li><p>allow to specify prefixes starting with “_” when
+customizing python_functions test discovery. (thanks Graham Horler)</p></li>
+<li><p>improve PYTEST_DEBUG tracing output by putting
+extra data on a new lines with additional indent</p></li>
+<li><p>ensure OutcomeExceptions like skip/fail have initialized exception attributes</p></li>
+<li><p>issue 260 - don’t use nose special setup on plain unittest cases</p></li>
+<li><p>fix issue134 - print the collect errors that prevent running specified test items</p></li>
+<li><p>fix issue266 - accept unicode in MarkEvaluator expressions</p></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../contents.html">
+              <img class="logo" src="../_static/pytest1.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel"
+        placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+  </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3><a href="../contents.html">Table Of Contents</a></h3>
+
+<ul>
+  <li><a href="../index.html">Home</a></li>
+  <li><a href="../getting-started.html">Install</a></li>
+  <li><a href="../contents.html">Contents</a></li>
+  <li><a href="../reference.html">API Reference</a></li>
+  <li><a href="../example/index.html">Examples</a></li>
+  <li><a href="../customize.html">Customize</a></li>
+  <li><a href="../changelog.html">Changelog</a></li>
+  <li><a href="../contributing.html">Contributing</a></li>
+  <li><a href="../backwards-compatibility.html">Backwards Compatibility</a></li>
+  <li><a href="../py27-py34-deprecation.html">Python 2.7 and 3.4 Support</a></li>
+  <li><a href="../sponsor.html">Sponsor</a></li>
+  <li><a href="../license.html">License</a></li>
+  <li><a href="../contact.html">Contact Channels</a></li>
+</ul>
+  <hr>
+  <ul>
+<li><a class="reference internal" href="#">pytest-2.3.5: bug fixes and little improvements</a><ul>
+<li><a class="reference internal" href="#changes-between-2-3-4-and-2-3-5">Changes between 2.3.4 and 2.3.5</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../contents.html">Documentation overview</a><ul>
+  <li><a href="index.html">Release announcements</a><ul>
+      <li>Previous: <a href="release-2.4.0.html" title="previous chapter">pytest-2.4.0: new fixture features/hooks and bug fixes</a></li>
+      <li>Next: <a href="release-2.3.4.html" title="next chapter">pytest-2.3.4: stabilization, more flexible selection via “-k expr”</a></li>
+  </ul></li>
+  </ul></li>
+</ul><h3>Useful Links</h3>
+<ul>
+  <li><a href="https://pypi.org/project/pytest/">pytest @ PyPI</a></li>
+  <li><a href="https://github.com/pytest-dev/pytest/">pytest @ GitHub</a></li>
+  <li><a href="http://plugincompat.herokuapp.com/">3rd party plugins</a></li>
+  <li><a href="https://github.com/pytest-dev/pytest/issues">Issue Tracker</a></li>
+  <li><a href="https://media.readthedocs.org/pdf/pytest/latest/pytest.pdf">PDF Documentation</a>
+</ul>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+  <div class="footer">
+    &copy; Copyright 2015–2019, holger krekel and pytest-dev team.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 2.1.2.
+  </div>
+  
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7597274-13']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+  </body>
+</html>

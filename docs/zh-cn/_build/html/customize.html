@@ -1,0 +1,270 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Configuration &#8212; pytest documentation</title>
+    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments_pytest.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="shortcut icon" href="_static/pytest1favi.ico"/>
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples and customization tricks" href="example/index.html" />
+    <link rel="prev" title="pytest import mechanisms and sys.path/PYTHONPATH" href="pythonpath.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+  
+  
+  
+
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="example/index.html" title="Examples and customization tricks"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="pythonpath.html" title="pytest import mechanisms and sys.path/PYTHONPATH"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="contents.html">pytest-5.0</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="configuration">
+<h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="command-line-options-and-configuration-file-settings">
+<h2>Command line options and configuration file settings<a class="headerlink" href="#command-line-options-and-configuration-file-settings" title="Permalink to this headline">¶</a></h2>
+<p>You can get help on command line options and values in INI-style
+configurations files by using the general help option:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest -h   <span class="c1"># prints options _and_ config file settings</span>
+</pre></div>
+</div>
+<p>This will display command line and configuration file settings
+which were registered by installed plugins.</p>
+</div>
+<div class="section" id="initialization-determining-rootdir-and-inifile">
+<span id="inifiles"></span><span id="rootdir"></span><h2>Initialization: determining rootdir and inifile<a class="headerlink" href="#initialization-determining-rootdir-and-inifile" title="Permalink to this headline">¶</a></h2>
+<p>pytest determines a <code class="docutils literal notranslate"><span class="pre">rootdir</span></code> for each test run which depends on
+the command line arguments (specified test files, paths) and on
+the existence of <em>ini-files</em>.  The determined <code class="docutils literal notranslate"><span class="pre">rootdir</span></code> and <em>ini-file</em> are
+printed as part of the pytest header during startup.</p>
+<p>Here’s a summary what <code class="docutils literal notranslate"><span class="pre">pytest</span></code> uses <code class="docutils literal notranslate"><span class="pre">rootdir</span></code> for:</p>
+<ul class="simple">
+<li><p>Construct <em>nodeids</em> during collection; each test is assigned
+a unique <em>nodeid</em> which is rooted at the <code class="docutils literal notranslate"><span class="pre">rootdir</span></code> and takes in account full path,
+class name, function name and parametrization (if any).</p></li>
+<li><p>Is used by plugins as a stable location to store project/test run specific information;
+for example, the internal <a class="reference internal" href="cache.html#cache"><span class="std std-ref">cache</span></a> plugin creates a <code class="docutils literal notranslate"><span class="pre">.pytest_cache</span></code> subdirectory
+in <code class="docutils literal notranslate"><span class="pre">rootdir</span></code> to store its cross-test run state.</p></li>
+</ul>
+<p>Important to emphasize that <code class="docutils literal notranslate"><span class="pre">rootdir</span></code> is <strong>NOT</strong> used to modify <code class="docutils literal notranslate"><span class="pre">sys.path</span></code>/<code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code> or
+influence how modules are imported. See <a class="reference internal" href="pythonpath.html#pythonpath"><span class="std std-ref">pytest import mechanisms and sys.path/PYTHONPATH</span></a> for more details.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--rootdir=path</span></code> command-line option can be used to force a specific directory.
+The directory passed may contain environment variables when it is used in conjunction
+with <code class="docutils literal notranslate"><span class="pre">addopts</span></code> in a <code class="docutils literal notranslate"><span class="pre">pytest.ini</span></code> file.</p>
+<div class="section" id="finding-the-rootdir">
+<h3>Finding the <code class="docutils literal notranslate"><span class="pre">rootdir</span></code><a class="headerlink" href="#finding-the-rootdir" title="Permalink to this headline">¶</a></h3>
+<p>Here is the algorithm which finds the rootdir from <code class="docutils literal notranslate"><span class="pre">args</span></code>:</p>
+<ul class="simple">
+<li><p>determine the common ancestor directory for the specified <code class="docutils literal notranslate"><span class="pre">args</span></code> that are
+recognised as paths that exist in the file system. If no such paths are
+found, the common ancestor directory is set to the current working directory.</p></li>
+<li><p>look for <code class="docutils literal notranslate"><span class="pre">pytest.ini</span></code>, <code class="docutils literal notranslate"><span class="pre">tox.ini</span></code> and <code class="docutils literal notranslate"><span class="pre">setup.cfg</span></code> files in the ancestor
+directory and upwards.  If one is matched, it becomes the ini-file and its
+directory becomes the rootdir.</p></li>
+<li><p>if no ini-file was found, look for <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> upwards from the common
+ancestor directory to determine the <code class="docutils literal notranslate"><span class="pre">rootdir</span></code>.</p></li>
+<li><p>if no <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> was found, look for <code class="docutils literal notranslate"><span class="pre">pytest.ini</span></code>, <code class="docutils literal notranslate"><span class="pre">tox.ini</span></code> and
+<code class="docutils literal notranslate"><span class="pre">setup.cfg</span></code> in each of the specified <code class="docutils literal notranslate"><span class="pre">args</span></code> and upwards. If one is
+matched, it becomes the ini-file and its directory becomes the rootdir.</p></li>
+<li><p>if no ini-file was found, use the already determined common ancestor as root
+directory. This allows the use of pytest in structures that are not part of
+a package and don’t have any particular ini-file configuration.</p></li>
+</ul>
+<p>If no <code class="docutils literal notranslate"><span class="pre">args</span></code> are given, pytest collects test below the current working
+directory and also starts determining the rootdir from there.</p>
+<dl class="field-list simple">
+<dt class="field-odd">warning</dt>
+<dd class="field-odd"><p>custom pytest plugin commandline arguments may include a path, as in
+<code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">--log-output</span> <span class="pre">../../test.log</span> <span class="pre">args</span></code>. Then <code class="docutils literal notranslate"><span class="pre">args</span></code> is mandatory,
+otherwise pytest uses the folder of test.log for rootdir determination
+(see also <a class="reference external" href="https://github.com/pytest-dev/pytest/issues/1435">issue 1435</a>).
+A dot <code class="docutils literal notranslate"><span class="pre">.</span></code> for referencing to the current working directory is also
+possible.</p>
+</dd>
+</dl>
+<p>Note that an existing <code class="docutils literal notranslate"><span class="pre">pytest.ini</span></code> file will always be considered a match,
+whereas <code class="docutils literal notranslate"><span class="pre">tox.ini</span></code> and <code class="docutils literal notranslate"><span class="pre">setup.cfg</span></code> will only match if they contain a
+<code class="docutils literal notranslate"><span class="pre">[pytest]</span></code> or <code class="docutils literal notranslate"><span class="pre">[tool:pytest]</span></code> section, respectively. Options from multiple ini-files candidates are never
+merged - the first one wins (<code class="docutils literal notranslate"><span class="pre">pytest.ini</span></code> always wins, even if it does not
+contain a <code class="docutils literal notranslate"><span class="pre">[pytest]</span></code> section).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">config</span></code> object will subsequently carry these attributes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">config.rootdir</span></code>: the determined root directory, guaranteed to exist.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">config.inifile</span></code>: the determined ini-file, may be <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+</ul>
+<p>The rootdir is used as a reference directory for constructing test
+addresses (“nodeids”) and can be used also by plugins for storing
+per-testrun information.</p>
+<p>Example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest path/to/testdir path/other/
+</pre></div>
+</div>
+<p>will determine the common ancestor as <code class="docutils literal notranslate"><span class="pre">path</span></code> and then
+check for ini-files as follows:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># first look for pytest.ini files
+path/pytest.ini
+path/setup.cfg  # must also contain [tool:pytest] section to match
+path/tox.ini    # must also contain [pytest] section to match
+pytest.ini
+... # all the way down to the root
+
+# now look for setup.py
+path/setup.py
+setup.py
+... # all the way down to the root
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="adding-default-options">
+<span id="how-to-change-command-line-options-defaults"></span><span id="id1"></span><h2>How to change command line options defaults<a class="headerlink" href="#adding-default-options" title="Permalink to this headline">¶</a></h2>
+<p>It can be tedious to type the same series of command line options
+every time you use <code class="docutils literal notranslate"><span class="pre">pytest</span></code>.  For example, if you always want to see
+detailed info on skipped and xfailed tests, as well as have terser “dot”
+progress output, you can write it into a configuration file:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="c1"># content of pytest.ini or tox.ini</span>
+<span class="c1"># setup.cfg files should use [tool:pytest] section instead</span>
+<span class="k">[pytest]</span>
+<span class="na">addopts</span> <span class="o">=</span> <span class="s">-ra -q</span>
+</pre></div>
+</div>
+<p>Alternatively, you can set a <code class="docutils literal notranslate"><span class="pre">PYTEST_ADDOPTS</span></code> environment variable to add command
+line options while the environment is in use:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">PYTEST_ADDOPTS</span><span class="o">=</span><span class="s2">&quot;-v&quot;</span>
+</pre></div>
+</div>
+<p>Here’s how the command-line is built in the presence of <code class="docutils literal notranslate"><span class="pre">addopts</span></code> or the environment variable:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;pytest.ini:addopts&gt; $PYTEST_ADDOPTS &lt;extra command-line arguments&gt;
+</pre></div>
+</div>
+<p>So if the user executes in the command-line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest -m slow
+</pre></div>
+</div>
+<p>The actual command line executed is:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest -ra -q -v -m slow
+</pre></div>
+</div>
+<p>Note that as usual for other command-line applications, in case of conflicting options the last one wins, so the example
+above will show verbose output because <code class="docutils literal notranslate"><span class="pre">-v</span></code> overwrites <code class="docutils literal notranslate"><span class="pre">-q</span></code>.</p>
+</div>
+<div class="section" id="builtin-configuration-file-options">
+<h2>Builtin configuration file options<a class="headerlink" href="#builtin-configuration-file-options" title="Permalink to this headline">¶</a></h2>
+<p>For the full list of options consult the <a class="reference internal" href="reference.html#ini-options-ref"><span class="std std-ref">reference documentation</span></a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="contents.html">
+              <img class="logo" src="_static/pytest1.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel"
+        placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+  </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3><a href="contents.html">Table Of Contents</a></h3>
+
+<ul>
+  <li><a href="index.html">Home</a></li>
+  <li><a href="getting-started.html">Install</a></li>
+  <li><a href="contents.html">Contents</a></li>
+  <li><a href="reference.html">API Reference</a></li>
+  <li><a href="example/index.html">Examples</a></li>
+  <li><a href="#">Customize</a></li>
+  <li><a href="changelog.html">Changelog</a></li>
+  <li><a href="contributing.html">Contributing</a></li>
+  <li><a href="backwards-compatibility.html">Backwards Compatibility</a></li>
+  <li><a href="py27-py34-deprecation.html">Python 2.7 and 3.4 Support</a></li>
+  <li><a href="sponsor.html">Sponsor</a></li>
+  <li><a href="license.html">License</a></li>
+  <li><a href="contact.html">Contact Channels</a></li>
+</ul>
+  <hr>
+  <ul>
+<li><a class="reference internal" href="#">Configuration</a><ul>
+<li><a class="reference internal" href="#command-line-options-and-configuration-file-settings">Command line options and configuration file settings</a></li>
+<li><a class="reference internal" href="#initialization-determining-rootdir-and-inifile">Initialization: determining rootdir and inifile</a><ul>
+<li><a class="reference internal" href="#finding-the-rootdir">Finding the <code class="docutils literal notranslate"><span class="pre">rootdir</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#adding-default-options">How to change command line options defaults</a></li>
+<li><a class="reference internal" href="#builtin-configuration-file-options">Builtin configuration file options</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="contents.html">Documentation overview</a><ul>
+      <li>Previous: <a href="pythonpath.html" title="previous chapter">pytest import mechanisms and <code class="docutils literal notranslate"><span class="pre">sys.path</span></code>/<code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code></a></li>
+      <li>Next: <a href="example/index.html" title="next chapter">Examples and customization tricks</a></li>
+  </ul></li>
+</ul><h3>Useful Links</h3>
+<ul>
+  <li><a href="https://pypi.org/project/pytest/">pytest @ PyPI</a></li>
+  <li><a href="https://github.com/pytest-dev/pytest/">pytest @ GitHub</a></li>
+  <li><a href="http://plugincompat.herokuapp.com/">3rd party plugins</a></li>
+  <li><a href="https://github.com/pytest-dev/pytest/issues">Issue Tracker</a></li>
+  <li><a href="https://media.readthedocs.org/pdf/pytest/latest/pytest.pdf">PDF Documentation</a>
+</ul>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+  <div class="footer">
+    &copy; Copyright 2015–2019, holger krekel and pytest-dev team.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 2.1.2.
+  </div>
+  
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7597274-13']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+  </body>
+</html>

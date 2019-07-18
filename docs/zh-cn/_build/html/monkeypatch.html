@@ -1,0 +1,518 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Monkeypatching/mocking modules and environments &#8212; pytest documentation</title>
+    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments_pytest.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="shortcut icon" href="_static/pytest1favi.ico"/>
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Temporary directories and files" href="tmpdir.html" />
+    <link rel="prev" title="Marking test functions with attributes" href="mark.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head><body>
+  
+  
+  
+
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="tmpdir.html" title="Temporary directories and files"
+             accesskey="N">next</a></li>
+        <li class="right" >
+          <a href="mark.html" title="Marking test functions with attributes"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="contents.html">pytest-5.0</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="monkeypatching-mocking-modules-and-environments">
+<h1>Monkeypatching/mocking modules and environments<a class="headerlink" href="#monkeypatching-mocking-modules-and-environments" title="Permalink to this headline">¶</a></h1>
+<p>Sometimes tests need to invoke functionality which depends
+on global settings or which invokes code which cannot be easily
+tested such as network access.  The <code class="docutils literal notranslate"><span class="pre">monkeypatch</span></code> fixture
+helps you to safely set/delete an attribute, dictionary item or
+environment variable, or to modify <code class="docutils literal notranslate"><span class="pre">sys.path</span></code> for importing.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">monkeypatch</span></code> fixture provides these helper methods for safely patching and mocking
+functionality in tests:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">raising</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">monkeypatch</span><span class="o">.</span><span class="n">delattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">raising</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">monkeypatch</span><span class="o">.</span><span class="n">setitem</span><span class="p">(</span><span class="n">mapping</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+<span class="n">monkeypatch</span><span class="o">.</span><span class="n">delitem</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">raising</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">monkeypatch</span><span class="o">.</span><span class="n">setenv</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">prepend</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">monkeypatch</span><span class="o">.</span><span class="n">delenv</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">raising</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">monkeypatch</span><span class="o">.</span><span class="n">syspath_prepend</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="n">monkeypatch</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>All modifications will be undone after the requesting
+test function or fixture has finished. The <code class="docutils literal notranslate"><span class="pre">raising</span></code>
+parameter determines if a <code class="docutils literal notranslate"><span class="pre">KeyError</span></code> or <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code>
+will be raised if the target of the set/deletion operation does not exist.</p>
+<p>Consider the following scenarios:</p>
+<p>1. Modifying the behavior of a function or the property of a class for a test e.g.
+there is an API call or database connection you will not make for a test but you know
+what the expected output should be. Use <code class="xref py py-meth docutils literal notranslate"><span class="pre">monkeypatch.setattr()</span></code> to patch the
+function or property with your desired testing behavior. This can include your own functions.
+Use <code class="xref py py-meth docutils literal notranslate"><span class="pre">monkeypatch.delattr()</span></code> to remove the function or property for the test.</p>
+<p>2. Modifying the values of dictionaries e.g. you have a global configuration that
+you want to modify for certain test cases. Use <code class="xref py py-meth docutils literal notranslate"><span class="pre">monkeypatch.setitem()</span></code> to patch the
+dictionary for the test. <code class="xref py py-meth docutils literal notranslate"><span class="pre">monkeypatch.delitem()</span></code> can be used to remove items.</p>
+<p>3. Modifying environment variables for a test e.g. to test program behavior if an
+environment variable is missing, or to set multiple values to a known variable.
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">monkeypatch.setenv()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">monkeypatch.delenv()</span></code> can be used for
+these patches.</p>
+<p>4. Use <code class="xref py py-meth docutils literal notranslate"><span class="pre">monkeypatch.syspath_prepend()</span></code> to modify the system <code class="docutils literal notranslate"><span class="pre">$PATH</span></code> safely, and
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">monkeypatch.chdir()</span></code> to change the context of the current working directory
+during a test.</p>
+<p>See the <a class="reference external" href="http://tetamap.wordpress.com/2009/03/03/monkeypatching-in-unit-tests-done-right/">monkeypatch blog post</a> for some introduction material
+and a discussion of its motivation.</p>
+<div class="section" id="simple-example-monkeypatching-functions">
+<h2>Simple example: monkeypatching functions<a class="headerlink" href="#simple-example-monkeypatching-functions" title="Permalink to this headline">¶</a></h2>
+<p>Consider a scenario where you are working with user directories. In the context of
+testing, you do not want your test to depend on the running user. <code class="docutils literal notranslate"><span class="pre">monkeypatch</span></code>
+can be used to patch functions dependent on the user to always return a
+specific value.</p>
+<p>In this example, <code class="xref py py-meth docutils literal notranslate"><span class="pre">monkeypatch.setattr()</span></code> is used to patch <code class="docutils literal notranslate"><span class="pre">Path.home</span></code>
+so that the known testing path <code class="docutils literal notranslate"><span class="pre">Path(&quot;/abc&quot;)</span></code> is always used when the test is run.
+This removes any dependency on the running user for testing purposes.
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">monkeypatch.setattr()</span></code> must be called before the function which will use
+the patched function is called.
+After the test function finishes the <code class="docutils literal notranslate"><span class="pre">Path.home</span></code> modification will be undone.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># contents of test_module.py with source code and the test</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+
+<span class="k">def</span> <span class="nf">getssh</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Simple function to return expanded homedir ssh path.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.ssh&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">test_getssh</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+    <span class="c1"># mocked return function to replace Path.home</span>
+    <span class="c1"># always return &#39;/abc&#39;</span>
+    <span class="k">def</span> <span class="nf">mockreturn</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/abc&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Application of the monkeypatch to replace Path.home</span>
+    <span class="c1"># with the behavior of mockreturn defined above.</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">Path</span><span class="p">,</span> <span class="s2">&quot;home&quot;</span><span class="p">,</span> <span class="n">mockreturn</span><span class="p">)</span>
+
+    <span class="c1"># Calling getssh() will use mockreturn in place of Path.home</span>
+    <span class="c1"># for this test with the monkeypatch.</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">getssh</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">x</span> <span class="o">==</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/abc/.ssh&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="monkeypatching-returned-objects-building-mock-classes">
+<h2>Monkeypatching returned objects: building mock classes<a class="headerlink" href="#monkeypatching-returned-objects-building-mock-classes" title="Permalink to this headline">¶</a></h2>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">monkeypatch.setattr()</span></code> can be used in conjunction with classes to mock returned
+objects from functions instead of values.
+Imagine a simple function to take an API url and return the json response.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># contents of app.py, a simple API retrieval example</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+
+
+<span class="k">def</span> <span class="nf">get_json</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Takes a URL, and returns the JSON.&quot;&quot;&quot;</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>We need to mock <code class="docutils literal notranslate"><span class="pre">r</span></code>, the returned response object for testing purposes.
+The mock of <code class="docutils literal notranslate"><span class="pre">r</span></code> needs a <code class="docutils literal notranslate"><span class="pre">.json()</span></code> method which returns a dictionary.
+This can be done in our test file by defining a class to represent <code class="docutils literal notranslate"><span class="pre">r</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># contents of test_app.py, a simple test for our API retrieval</span>
+<span class="c1"># import requests for the purposes of monkeypatching</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="c1"># our app.py that includes the get_json() function</span>
+<span class="c1"># this is the previous code block example</span>
+<span class="kn">import</span> <span class="nn">app</span>
+
+<span class="c1"># custom class to be the mock return value</span>
+<span class="c1"># will override the requests.Response returned from requests.get</span>
+<span class="k">class</span> <span class="nc">MockResponse</span><span class="p">:</span>
+
+    <span class="c1"># mock json() method always returns a specific testing dictionary</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">json</span><span class="p">():</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;mock_key&quot;</span><span class="p">:</span> <span class="s2">&quot;mock_response&quot;</span><span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">test_get_json</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+
+    <span class="c1"># Any arguments may be passed and mock_get() will always return our</span>
+    <span class="c1"># mocked object, which only has the .json() method.</span>
+    <span class="k">def</span> <span class="nf">mock_get</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">MockResponse</span><span class="p">()</span>
+
+    <span class="c1"># apply the monkeypatch for requests.get to mock_get</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">requests</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">mock_get</span><span class="p">)</span>
+
+    <span class="c1"># app.get_json, which contains requests.get, uses the monkeypatch</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">get_json</span><span class="p">(</span><span class="s2">&quot;https://fakeurl&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;mock_key&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;mock_response&quot;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">monkeypatch</span></code> applies the mock for <code class="docutils literal notranslate"><span class="pre">requests.get</span></code> with our <code class="docutils literal notranslate"><span class="pre">mock_get</span></code> function.
+The <code class="docutils literal notranslate"><span class="pre">mock_get</span></code> function returns an instance of the <code class="docutils literal notranslate"><span class="pre">MockResponse</span></code> class, which
+has a <code class="docutils literal notranslate"><span class="pre">json()</span></code> method defined to return a known testing dictionary and does not
+require any outside API connection.</p>
+<p>You can build the <code class="docutils literal notranslate"><span class="pre">MockResponse</span></code> class with the appropriate degree of complexity for
+the scenario you are testing. For instance, it could include an <code class="docutils literal notranslate"><span class="pre">ok</span></code> property that
+always returns <code class="docutils literal notranslate"><span class="pre">True</span></code>, or return different values from the <code class="docutils literal notranslate"><span class="pre">json()</span></code> mocked method
+based on input strings.</p>
+<p>This mock can be shared across tests using a <code class="docutils literal notranslate"><span class="pre">fixture</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># contents of test_app.py, a simple test for our API retrieval</span>
+<span class="kn">import</span> <span class="nn">pytest</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="c1"># app.py that includes the get_json() function</span>
+<span class="kn">import</span> <span class="nn">app</span>
+
+<span class="c1"># custom class to be the mock return value of requests.get()</span>
+<span class="k">class</span> <span class="nc">MockResponse</span><span class="p">:</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">json</span><span class="p">():</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;mock_key&quot;</span><span class="p">:</span> <span class="s2">&quot;mock_response&quot;</span><span class="p">}</span>
+
+
+<span class="c1"># monkeypatched requests.get moved to a fixture</span>
+<span class="nd">@pytest.fixture</span>
+<span class="k">def</span> <span class="nf">mock_response</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Requests.get() mocked to return {&#39;mock_key&#39;:&#39;mock_response&#39;}.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">mock_get</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">MockResponse</span><span class="p">()</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">requests</span><span class="p">,</span> <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">mock_get</span><span class="p">)</span>
+
+
+<span class="c1"># notice our test uses the custom fixture instead of monkeypatch directly</span>
+<span class="k">def</span> <span class="nf">test_get_json</span><span class="p">(</span><span class="n">mock_response</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">get_json</span><span class="p">(</span><span class="s2">&quot;https://fakeurl&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;mock_key&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;mock_response&quot;</span>
+</pre></div>
+</div>
+<p>Furthermore, if the mock was designed to be applied to all tests, the <code class="docutils literal notranslate"><span class="pre">fixture</span></code> could
+be moved to a <code class="docutils literal notranslate"><span class="pre">conftest.py</span></code> file and use the with <code class="docutils literal notranslate"><span class="pre">autouse=True</span></code> option.</p>
+</div>
+<div class="section" id="global-patch-example-preventing-requests-from-remote-operations">
+<h2>Global patch example: preventing “requests” from remote operations<a class="headerlink" href="#global-patch-example-preventing-requests-from-remote-operations" title="Permalink to this headline">¶</a></h2>
+<p>If you want to prevent the “requests” library from performing http
+requests in all your tests, you can do:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># contents of conftest.py</span>
+<span class="kn">import</span> <span class="nn">pytest</span>
+
+
+<span class="nd">@pytest.fixture</span><span class="p">(</span><span class="n">autouse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">no_requests</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove requests.sessions.Session.request for all tests.&quot;&quot;&quot;</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">delattr</span><span class="p">(</span><span class="s2">&quot;requests.sessions.Session.request&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This autouse fixture will be executed for each test function and it
+will delete the method <code class="docutils literal notranslate"><span class="pre">request.session.Session.request</span></code>
+so that any attempts within tests to create http requests will fail.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Be advised that it is not recommended to patch builtin functions such as <code class="docutils literal notranslate"><span class="pre">open</span></code>,
+<code class="docutils literal notranslate"><span class="pre">compile</span></code>, etc., because it might break pytest’s internals. If that’s
+unavoidable, passing <code class="docutils literal notranslate"><span class="pre">--tb=native</span></code>, <code class="docutils literal notranslate"><span class="pre">--assert=plain</span></code> and <code class="docutils literal notranslate"><span class="pre">--capture=no</span></code> might
+help although there’s no guarantee.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Mind that patching <code class="docutils literal notranslate"><span class="pre">stdlib</span></code> functions and some third-party libraries used by pytest
+might break pytest itself, therefore in those cases it is recommended to use
+<a class="reference internal" href="reference.html#_pytest.monkeypatch.MonkeyPatch.context" title="_pytest.monkeypatch.MonkeyPatch.context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MonkeyPatch.context()</span></code></a> to limit the patching to the block you want tested:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">functools</span>
+
+
+<span class="k">def</span> <span class="nf">test_partial</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">monkeypatch</span><span class="o">.</span><span class="n">context</span><span class="p">()</span> <span class="k">as</span> <span class="n">m</span><span class="p">:</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">functools</span><span class="p">,</span> <span class="s2">&quot;partial&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span> <span class="o">==</span> <span class="mi">3</span>
+</pre></div>
+</div>
+<p>See issue <a class="reference external" href="https://github.com/pytest-dev/pytest/issues/3290">#3290</a> for details.</p>
+</div>
+</div>
+<div class="section" id="monkeypatching-environment-variables">
+<h2>Monkeypatching environment variables<a class="headerlink" href="#monkeypatching-environment-variables" title="Permalink to this headline">¶</a></h2>
+<p>If you are working with environment variables you often need to safely change the values
+or delete them from the system for testing purposes. <code class="docutils literal notranslate"><span class="pre">monkeypatch</span></code> provides a mechanism
+to do this using the <code class="docutils literal notranslate"><span class="pre">setenv</span></code> and <code class="docutils literal notranslate"><span class="pre">delenv</span></code> method. Our example code to test:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># contents of our original code file e.g. code.py</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+
+<span class="k">def</span> <span class="nf">get_os_user_lower</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Simple retrieval function.</span>
+<span class="sd">    Returns lowercase USER or raises EnvironmentError.&quot;&quot;&quot;</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;USER&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">username</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">EnvironmentError</span><span class="p">(</span><span class="s2">&quot;USER environment is not set.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">username</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>There are two potential paths. First, the <code class="docutils literal notranslate"><span class="pre">USER</span></code> environment variable is set to a
+value. Second, the <code class="docutils literal notranslate"><span class="pre">USER</span></code> environment variable does not exist. Using <code class="docutils literal notranslate"><span class="pre">monkeypatch</span></code>
+both paths can be safely tested without impacting the running environment:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># contents of our test file e.g. test_code.py</span>
+<span class="kn">import</span> <span class="nn">pytest</span>
+
+
+<span class="k">def</span> <span class="nf">test_upper_to_lower</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set the USER env var to assert the behavior.&quot;&quot;&quot;</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setenv</span><span class="p">(</span><span class="s2">&quot;USER&quot;</span><span class="p">,</span> <span class="s2">&quot;TestingUser&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">get_os_user_lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;testinguser&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">test_raise_exception</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove the USER env var and assert EnvironmentError is raised.&quot;&quot;&quot;</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">delenv</span><span class="p">(</span><span class="s2">&quot;USER&quot;</span><span class="p">,</span> <span class="n">raising</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">EnvironmentError</span><span class="p">):</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">get_os_user_lower</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This behavior can be moved into <code class="docutils literal notranslate"><span class="pre">fixture</span></code> structures and shared across tests:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># contents of our test file e.g. test_code.py</span>
+<span class="kn">import</span> <span class="nn">pytest</span>
+
+
+<span class="nd">@pytest.fixture</span>
+<span class="k">def</span> <span class="nf">mock_env_user</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setenv</span><span class="p">(</span><span class="s2">&quot;USER&quot;</span><span class="p">,</span> <span class="s2">&quot;TestingUser&quot;</span><span class="p">)</span>
+
+
+<span class="nd">@pytest.fixture</span>
+<span class="k">def</span> <span class="nf">mock_env_missing</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">delenv</span><span class="p">(</span><span class="s2">&quot;USER&quot;</span><span class="p">,</span> <span class="n">raising</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+
+<span class="c1"># notice the tests reference the fixtures for mocks</span>
+<span class="k">def</span> <span class="nf">test_upper_to_lower</span><span class="p">(</span><span class="n">mock_env_user</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">get_os_user_lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;testinguser&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">test_raise_exception</span><span class="p">(</span><span class="n">mock_env_missing</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">EnvironmentError</span><span class="p">):</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">get_os_user_lower</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="monkeypatching-dictionaries">
+<h2>Monkeypatching dictionaries<a class="headerlink" href="#monkeypatching-dictionaries" title="Permalink to this headline">¶</a></h2>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">monkeypatch.setitem()</span></code> can be used to safely set the values of dictionaries
+to specific values during tests. Take this simplified connection string example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># contents of app.py to generate a simple connection string</span>
+<span class="n">DEFAULT_CONFIG</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="s2">&quot;user1&quot;</span><span class="p">,</span> <span class="s2">&quot;database&quot;</span><span class="p">:</span> <span class="s2">&quot;db1&quot;</span><span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">create_connection_string</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates a connection string from input or defaults.&quot;&quot;&quot;</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">config</span> <span class="ow">or</span> <span class="n">DEFAULT_CONFIG</span>
+    <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;User Id={config[&#39;user&#39;]}; Location={config[&#39;database&#39;]};&quot;</span>
+</pre></div>
+</div>
+<p>For testing purposes we can patch the <code class="docutils literal notranslate"><span class="pre">DEFAULT_CONFIG</span></code> dictionary to specific values.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># contents of test_app.py</span>
+<span class="c1"># app.py with the connection string function (prior code block)</span>
+<span class="kn">import</span> <span class="nn">app</span>
+
+
+<span class="k">def</span> <span class="nf">test_connection</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+
+    <span class="c1"># Patch the values of DEFAULT_CONFIG to specific</span>
+    <span class="c1"># testing values only for this test.</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setitem</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">DEFAULT_CONFIG</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;test_user&quot;</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setitem</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">DEFAULT_CONFIG</span><span class="p">,</span> <span class="s2">&quot;database&quot;</span><span class="p">,</span> <span class="s2">&quot;test_db&quot;</span><span class="p">)</span>
+
+    <span class="c1"># expected result based on the mocks</span>
+    <span class="n">expected</span> <span class="o">=</span> <span class="s2">&quot;User Id=test_user; Location=test_db;&quot;</span>
+
+    <span class="c1"># the test uses the monkeypatched dictionary settings</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">create_connection_string</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="n">expected</span>
+</pre></div>
+</div>
+<p>You can use the <code class="xref py py-meth docutils literal notranslate"><span class="pre">monkeypatch.delitem()</span></code> to remove values.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># contents of test_app.py</span>
+<span class="kn">import</span> <span class="nn">pytest</span>
+
+<span class="c1"># app.py with the connection string function</span>
+<span class="kn">import</span> <span class="nn">app</span>
+
+
+<span class="k">def</span> <span class="nf">test_missing_user</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+
+    <span class="c1"># patch the DEFAULT_CONFIG t be missing the &#39;user&#39; key</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">delitem</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">DEFAULT_CONFIG</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">raising</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="c1"># Key error expected because a config is not passed, and the</span>
+    <span class="c1"># default is now missing the &#39;user&#39; entry.</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">KeyError</span><span class="p">):</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">create_connection_string</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The modularity of fixtures gives you the flexibility to define
+separate fixtures for each potential mock and reference them in the needed tests.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># contents of test_app.py</span>
+<span class="kn">import</span> <span class="nn">pytest</span>
+
+<span class="c1"># app.py with the connection string function</span>
+<span class="kn">import</span> <span class="nn">app</span>
+
+<span class="c1"># all of the mocks are moved into separated fixtures</span>
+<span class="nd">@pytest.fixture</span>
+<span class="k">def</span> <span class="nf">mock_test_user</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set the DEFAULT_CONFIG user to test_user.&quot;&quot;&quot;</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setitem</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">DEFAULT_CONFIG</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;test_user&quot;</span><span class="p">)</span>
+
+
+<span class="nd">@pytest.fixture</span>
+<span class="k">def</span> <span class="nf">mock_test_database</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set the DEFAULT_CONFIG database to test_db.&quot;&quot;&quot;</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setitem</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">DEFAULT_CONFIG</span><span class="p">,</span> <span class="s2">&quot;database&quot;</span><span class="p">,</span> <span class="s2">&quot;test_db&quot;</span><span class="p">)</span>
+
+
+<span class="nd">@pytest.fixture</span>
+<span class="k">def</span> <span class="nf">mock_missing_default_user</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove the user key from DEFAULT_CONFIG&quot;&quot;&quot;</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">delitem</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">DEFAULT_CONFIG</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">raising</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+
+<span class="c1"># tests reference only the fixture mocks that are needed</span>
+<span class="k">def</span> <span class="nf">test_connection</span><span class="p">(</span><span class="n">mock_test_user</span><span class="p">,</span> <span class="n">mock_test_database</span><span class="p">):</span>
+
+    <span class="n">expected</span> <span class="o">=</span> <span class="s2">&quot;User Id=test_user; Location=test_db;&quot;</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">create_connection_string</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="n">expected</span>
+
+
+<span class="k">def</span> <span class="nf">test_missing_user</span><span class="p">(</span><span class="n">mock_missing_default_user</span><span class="p">):</span>
+
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">KeyError</span><span class="p">):</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">create_connection_string</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="api-reference">
+<h2>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h2>
+<p>Consult the docs for the <a class="reference internal" href="reference.html#_pytest.monkeypatch.MonkeyPatch" title="_pytest.monkeypatch.MonkeyPatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">MonkeyPatch</span></code></a> class.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="contents.html">
+              <img class="logo" src="_static/pytest1.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel"
+        placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+  </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3><a href="contents.html">Table Of Contents</a></h3>
+
+<ul>
+  <li><a href="index.html">Home</a></li>
+  <li><a href="getting-started.html">Install</a></li>
+  <li><a href="contents.html">Contents</a></li>
+  <li><a href="reference.html">API Reference</a></li>
+  <li><a href="example/index.html">Examples</a></li>
+  <li><a href="customize.html">Customize</a></li>
+  <li><a href="changelog.html">Changelog</a></li>
+  <li><a href="contributing.html">Contributing</a></li>
+  <li><a href="backwards-compatibility.html">Backwards Compatibility</a></li>
+  <li><a href="py27-py34-deprecation.html">Python 2.7 and 3.4 Support</a></li>
+  <li><a href="sponsor.html">Sponsor</a></li>
+  <li><a href="license.html">License</a></li>
+  <li><a href="contact.html">Contact Channels</a></li>
+</ul>
+  <hr>
+  <ul>
+<li><a class="reference internal" href="#">Monkeypatching/mocking modules and environments</a><ul>
+<li><a class="reference internal" href="#simple-example-monkeypatching-functions">Simple example: monkeypatching functions</a></li>
+<li><a class="reference internal" href="#monkeypatching-returned-objects-building-mock-classes">Monkeypatching returned objects: building mock classes</a></li>
+<li><a class="reference internal" href="#global-patch-example-preventing-requests-from-remote-operations">Global patch example: preventing “requests” from remote operations</a></li>
+<li><a class="reference internal" href="#monkeypatching-environment-variables">Monkeypatching environment variables</a></li>
+<li><a class="reference internal" href="#monkeypatching-dictionaries">Monkeypatching dictionaries</a></li>
+<li><a class="reference internal" href="#api-reference">API Reference</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="contents.html">Documentation overview</a><ul>
+      <li>Previous: <a href="mark.html" title="previous chapter">Marking test functions with attributes</a></li>
+      <li>Next: <a href="tmpdir.html" title="next chapter">Temporary directories and files</a></li>
+  </ul></li>
+</ul><h3>Useful Links</h3>
+<ul>
+  <li><a href="https://pypi.org/project/pytest/">pytest @ PyPI</a></li>
+  <li><a href="https://github.com/pytest-dev/pytest/">pytest @ GitHub</a></li>
+  <li><a href="http://plugincompat.herokuapp.com/">3rd party plugins</a></li>
+  <li><a href="https://github.com/pytest-dev/pytest/issues">Issue Tracker</a></li>
+  <li><a href="https://media.readthedocs.org/pdf/pytest/latest/pytest.pdf">PDF Documentation</a>
+</ul>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+  <div class="footer">
+    &copy; Copyright 2015–2019, holger krekel and pytest-dev team.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 2.1.2.
+  </div>
+  
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7597274-13']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+  </body>
+</html>
