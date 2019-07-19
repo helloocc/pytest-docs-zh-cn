@@ -1,5 +1,6 @@
 sphinx
 pytest
 pygments
+pygments_pytest
 sphinx-removed-in
 sphinxcontrib-trio
