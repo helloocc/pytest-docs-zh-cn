@@ -1,0 +1,5 @@
+sphinx
+pytest
+pygments
+sphinx-removed-in
+sphinxcontrib-trio
