@@ -2,7 +2,7 @@
 .. _fixtures:
 .. _`fixture functions`:
 
-pytest fixtures: explicit, modular, scalable
+pytest fixtures: 显示，模块化，可扩展
 ========================================================
 
 .. currentmodule:: _pytest.python
@@ -11,28 +11,20 @@ pytest fixtures: explicit, modular, scalable
 
 .. _`xUnit`: http://en.wikipedia.org/wiki/XUnit
 .. _`purpose of test fixtures`: http://en.wikipedia.org/wiki/Test_fixture#Software
-.. _`Dependency injection`: http://en.wikipedia.org/wiki/Dependency_injection
+.. _`依赖注入`: http://en.wikipedia.org/wiki/Dependency_injection
 
-The `purpose of test fixtures`_ is to provide a fixed baseline
-upon which tests can reliably and repeatedly execute.   pytest fixtures
-offer dramatic improvements over the classic xUnit style of setup/teardown
-functions:
+`测试fixtures` 的目的是提供一个固定基线，在此基础上测试可以可靠地重复执行。pytest
+fixtures较经典xUnit风格的setup/teardown功能有了显著改进:
 
-* fixtures have explicit names and are activated by declaring their use
-  from test functions, modules, classes or whole projects.
+* fixtures具有显式的名称，并可以从声明它的测试函数，模块，类或整个项目中激活它。
 
-* fixtures are implemented in a modular manner, as each fixture name
-  triggers a *fixture function* which can itself use other fixtures.
+* fixture以模块化的方式实现，因为每个fixture名称都触发一个 *fixture函数*，该函数本身可以使用其他fixture。
 
-* fixture management scales from simple unit to complex
-  functional testing, allowing to parametrize fixtures and tests according
-  to configuration and component options, or to re-use fixtures
-  across function, class, module or whole test session scopes.
+* fixture管理从简单的单元扩展到复杂的功能测试，允许根据配置和组件选项对fixture和测试进行参数化，
+  或者在函数、类、模块及整个测试会话范围内重用fixtures。
 
-In addition, pytest continues to support :ref:`xunitsetup`.  You can mix
-both styles, moving incrementally from classic to new style, as you
-prefer.  You can also start out from existing :ref:`unittest.TestCase
-style <unittest.TestCase>` or :ref:`nose based <nosestyle>` projects.
+此外，pytest继续支持 :ref:`经典xunit setup <xunitsetup>` 。您可以混合使用这两种样式，根据您的喜好从经典样式逐渐过渡到新样式。
+您也可以从现有的 :ref:`unittest.TestCase样式 <unittest.TestCase>` 或 :ref:`基于nose <nosestyle>` 开始。
 
 
 .. _`funcargs`:
@@ -41,15 +33,12 @@ style <unittest.TestCase>` or :ref:`nose based <nosestyle>` projects.
 .. _`@pytest.fixture`:
 .. _`pytest.fixture`:
 
-Fixtures as Function arguments
+Fixtures作为函数参数
 -----------------------------------------
 
-Test functions can receive fixture objects by naming them as an input
-argument. For each argument name, a fixture function with that name provides
-the fixture object.  Fixture functions are registered by marking them with
-:py:func:`@pytest.fixture <_pytest.python.fixture>`.  Let's look at a simple
-self-contained test module containing a fixture and a test function
-using it::
+测试函数通过将入参命名为fixture对象名来接收它们。对于每个参数，具有该名称的fixture函数会提供fixture对象。
+Fixture函数通过标记 :py:func:`@pytest.fixture <_pytest.python.fixture>` 来注册。
+让我们来看一个包含fixture和测试函数的简单测试模块::
 
     # content of ./test_smtpsimple.py
     import pytest
@@ -64,9 +53,8 @@ using it::
         assert response == 250
         assert 0 # for demo purposes
 
-Here, the ``test_ehlo`` needs the ``smtp_connection`` fixture value.  pytest
-will discover and call the :py:func:`@pytest.fixture <_pytest.python.fixture>`
-marked ``smtp_connection`` fixture function.  Running the test looks like this:
+这里， ``test_ehlo`` 需要 ``smtp_connection`` 的fixture值。pytest会发现并调用带有
+:py:func:`@pytest.fixture <_pytest.python.fixture>` 标记的fixture函数 ``smtp_connection`` 。运行测试如下所示：
 
 .. code-block:: pytest
 
@@ -93,44 +81,36 @@ marked ``smtp_connection`` fixture function.  Running the test looks like this:
     test_smtpsimple.py:11: AssertionError
     ========================= 1 failed in 0.12 seconds =========================
 
-In the failure traceback we see that the test function was called with a
-``smtp_connection`` argument, the ``smtplib.SMTP()`` instance created by the fixture
-function.  The test function fails on our deliberate ``assert 0``.  Here is
-the exact protocol used by ``pytest`` to call the test function this way:
+在错误回溯中，我们看到测试函数调用了 ``smtp_connection`` 参数，其 ``smtplib.SMTP()`` 实例由fixture函数创建。
+测试函数因为我们故意的 ``assert 0`` 而失败。以下是 ``pytest`` 调用测试函数的具体流程：
 
-1. pytest :ref:`finds <test discovery>` the ``test_ehlo`` because
-   of the ``test_`` prefix.  The test function needs a function argument
-   named ``smtp_connection``.  A matching fixture function is discovered by
-   looking for a fixture-marked function named ``smtp_connection``.
 
-2. ``smtp_connection()`` is called to create an instance.
 
-3. ``test_ehlo(<smtp_connection instance>)`` is called and fails in the last
-   line of the test function.
+1. pytest根据 ``test_`` 前缀 :ref:`发现 <test discovery>` ``test_ehlo`` 。测试函数需要一个名为
+   ``smtp_connection`` 的入参，通过查找以fixture标记的 ``smtp_connection`` 函数，可以发现匹配的fixture函数。
 
-Note that if you misspell a function argument or want
-to use one that isn't available, you'll see an error
-with a list of available function arguments.
+2. 调用 ``smtp_connection()`` 创建实例。
+
+
+3. 调用 ``test_ehlo(<smtp_connection instance>)`` ，然后在测试函数的最后一行失败了。
+
+注意，如果您拼错了函数参数，或者希望使用不可用的参数，您将看到一个带有可用函数参数列表的错误。
 
 .. note::
 
-    You can always issue:
+    你可以像这样：
 
     .. code-block:: bash
 
         pytest --fixtures test_simplefactory.py
 
-    to see available fixtures (fixtures with leading ``_`` are only shown if you add the ``-v`` option).
+    查看可用的fixtures（只有添加 ``-v`` 选项，才能显示以 ``_`` 开头的fixture）
 
-Fixtures: a prime example of dependency injection
+Fixtures: 依赖注入的典型
 ---------------------------------------------------
 
-Fixtures allow test functions to easily receive and work
-against specific pre-initialized application objects without having
-to care about import/setup/cleanup details.
-It's a prime example of `dependency injection`_ where fixture
-functions take the role of the *injector* and test functions are the
-*consumers* of fixture objects.
+Fixtures使得测试函数可以轻松地接受和处理特定的预初始化应用程序对象，而不必关心导入/设置/清理的细节。
+这是一个 `依赖注入`_ 的典型例子，其中fixtures函数充当 *注入器* 的角色，而测试函数是fixture对象的 *消费者* 。
 
 .. _`conftest.py`:
 .. _`conftest`:
