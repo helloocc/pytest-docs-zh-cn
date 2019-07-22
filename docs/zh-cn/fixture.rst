@@ -115,52 +115,41 @@ Fixtures使得测试函数可以轻松地接受和处理特定的预初始化应
 .. _`conftest.py`:
 .. _`conftest`:
 
-``conftest.py``: sharing fixture functions
+``conftest.py``: 共享fixture函数
 ------------------------------------------
 
-If during implementing your tests you realize that you
-want to use a fixture function from multiple test files you can move it
-to a ``conftest.py`` file.
-You don't need to import the fixture you want to use in a test, it
-automatically gets discovered by pytest. The discovery of
-fixture functions starts at test classes, then test modules, then
-``conftest.py`` files and finally builtin and third party plugins.
+如果在实现测试期间，您希望在多个测试文件中使用同一个fixture函数，您可以将它移动到
+``conftest.py`` 文件中。
+您不需要在测试文件中导入fixture，它会自动被pytest发现。fixture函数的发现从测试类开始，
+然后是测试模块，接着是 ``conftest.py`` 文件，最后是内置和第三方插件。
 
-You can also use the ``conftest.py`` file to implement
-:ref:`local per-directory plugins <conftest.py plugins>`.
+您还可以使用 ``conftest.py`` 文件来实现 :ref:`本地目录插件 <conftest.py plugins>` 。
 
-Sharing test data
+共享测试数据
 -----------------
 
-If you want to make test data from files available to your tests, a good way
-to do this is by loading these data in a fixture for use by your tests.
-This makes use of the automatic caching mechanisms of pytest.
+如果您想让测试用例从文件中获取测试数据，那么将这些数据加载到fixture中不失为一个好主意。
+这利用了pytest的自动缓存机制。
 
-Another good approach is by adding the data files in the ``tests`` folder.
-There are also community plugins available to help managing this aspect of
-testing, e.g. `pytest-datadir <https://pypi.org/project/pytest-datadir/>`__
-and `pytest-datafiles <https://pypi.org/project/pytest-datafiles/>`__.
+另一个方法是在 ``tests`` 文件夹中添加测试数据。此外，社区插件也可用于管理这方面的测试，例如：
+`pytest-datadir <https://pypi.org/project/pytest-datadir/>`__ 和
+`pytest-datafiles <https://pypi.org/project/pytest-datafiles/>`__ 。
 
 .. _smtpshared:
 
-Scope: sharing a fixture instance across tests in a class, module or session
+Scope：在测试类、模块或会话间共享fixture实例
 ----------------------------------------------------------------------------
 
 .. regendoc:wipe
 
-Fixtures requiring network access depend on connectivity and are
-usually time-expensive to create.  Extending the previous example, we
-can add a ``scope="module"`` parameter to the
-:py:func:`@pytest.fixture <_pytest.python.fixture>` invocation
-to cause the decorated ``smtp_connection`` fixture function to only be invoked
-once per test *module* (the default is to invoke once per test *function*).
-Multiple test functions in a test module will thus
-each receive the same ``smtp_connection`` fixture instance, thus saving time.
-Possible values for ``scope`` are: ``function``, ``class``, ``module``, ``package`` or ``session``.
+需要网络访问的fixture依赖于连接性，而且通常创建非常耗时。扩展之前的例子，我们可以向
+:py:func:`@pytest.fixture <_pytest.python.fixture>` 添加 ``scope="module"`` 参数，使得fixture函数
+``smtp_connection`` 只被每个测试 *模块* 调用一次（默认是每个测试 *函数* 调用一次）。
+因此，测试模块中的多个测试函数将接收同一个fixture实例 ``smtp_connection`` 。对于 ``scope`` 可能的值有：
+``function``, ``class``, ``module``, ``package`` 或 ``session`` 。
 
-The next example puts the fixture function into a separate ``conftest.py`` file
-so that tests from multiple test modules in the directory can
-access the fixture function::
+下一个例子将fixture函数放入单独的 ``conftest.py`` 文件中，所以目录内多个测试模块中的测试用例都可以访问
+fixture函数::
 
     # content of conftest.py
     import pytest
@@ -170,10 +159,8 @@ access the fixture function::
     def smtp_connection():
         return smtplib.SMTP("smtp.gmail.com", 587, timeout=5)
 
-The name of the fixture again is ``smtp_connection`` and you can access its
-result by listing the name ``smtp_connection`` as an input parameter in any
-test or fixture function (in or below the directory where ``conftest.py`` is
-located)::
+fixture的名字仍是 ``smtp_connection`` ，您可以在任何测试或fixture函数中（ ``conftest.py`` 所在目录中或目录下）
+将 ``smtp_connection`` 作为入参来访问它的结果::
 
     # content of test_module.py
 
@@ -188,8 +175,7 @@ located)::
         assert response == 250
         assert 0  # for demo purposes
 
-We deliberately insert failing ``assert 0`` statements in order to
-inspect what is going on and can now run the tests:
+我们故意插入失败的 ``assert 0`` 语句以便检查发生了什么，现在运行测试用例：
 
 .. code-block:: pytest
 
@@ -228,14 +214,11 @@ inspect what is going on and can now run the tests:
     test_module.py:11: AssertionError
     ========================= 2 failed in 0.12 seconds =========================
 
-You see the two ``assert 0`` failing and more importantly you can also see
-that the same (module-scoped) ``smtp_connection`` object was passed into the
-two test functions because pytest shows the incoming argument values in the
-traceback.  As a result, the two test functions using ``smtp_connection`` run
-as quick as a single one because they reuse the same instance.
+您可以看到两个 ``assert 0`` 失败了，更重要的是您还可以看到相同的（模块范围） ``smtp_connection`` 对象
+被传入两个测试函数中，因为pytest在回溯中显示入参值。因此，使用 ``smtp_connection`` 的两个测试函数
+运行速度和单个测试函数一样快，因为它们重用了相同的实例。
 
-If you decide that you rather want to have a session-scoped ``smtp_connection``
-instance, you can simply declare it:
+如果您决定要使用会话范围的 ``smtp_connection`` 实例，只需要声明如下：
 
 .. code-block:: python
 
@@ -245,54 +228,46 @@ instance, you can simply declare it:
         # all tests needing it
         ...
 
-Finally, the ``class`` scope will invoke the fixture once per test *class*.
+最后， ``class`` 范围的fixture将会在每个测试 *类* 中被调用一次。
 
 .. note::
 
-    Pytest will only cache one instance of a fixture at a time.
-    This means that when using a parametrized fixture, pytest may invoke a fixture more than once in the given scope.
+    Pytest每次只缓存一个fixture实例。
+    这意味着当使用参数化的fixture时，pytest可以在指定范围内多次调用fixture。
 
 
-``package`` scope (experimental)
+``package`` 范围 (实验性)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-
-In pytest 3.7 the ``package`` scope has been introduced. Package-scoped fixtures
-are finalized when the last test of a *package* finishes.
+在pytest 3.7中，引入了 ``package`` 范围。当测试用例的最后一个 *包* 完成时，包范围的fixtures结束。
 
 .. warning::
-    This functionality is considered **experimental** and may be removed in future
-    versions if hidden corner-cases or serious problems with this functionality
-    are discovered after it gets more usage in the wild.
+    该功能被认为是 **实验性** 的，如果在更多使用该功能后，发现了隐藏情况或严重问题，则该功能可能在未来版本中被删除。
 
-    Use this new feature sparingly and please make sure to report any issues you find.
+    谨慎使用此新功能，请务必报告您发现的任何问题。
 
 
-Order: Higher-scoped fixtures are instantiated first
+
+顺序：首先实例化范围更大的fixture
 ----------------------------------------------------
 
 
+在请求功能函数时，首先实例化范围更大的fixture（例如 ``session`` ），而不是范围较小的fixtures（例如
+``function`` 或 ``class`` ）。相同范围的fixture，其相对顺序遵循测试函数中的声明顺序和fixtures间的荣誉依赖关系。
 
-Within a function request for features, fixture of higher-scopes (such as ``session``) are instantiated first than
-lower-scoped fixtures (such as ``function`` or ``class``). The relative order of fixtures of same scope follows
-the declared order in the test function and honours dependencies between fixtures. Autouse fixtures will be
-instantiated before explicitly used fixtures.
-
-Consider the code below:
+请考虑如下代码：
 
 .. literalinclude:: example/fixtures/test_fixtures_order.py
 
-The fixtures requested by ``test_foo`` will be instantiated in the following order:
+``test_foo`` 请求的fixtures，将按照以下顺序实例化：
 
-1. ``s1``: is the highest-scoped fixture (``session``).
-2. ``m1``: is the second highest-scoped fixture (``module``).
-   because it is a dependency of ``f1``.
-3. ``a1``: is a ``function``-scoped ``autouse`` fixture: it will be instantiated before other fixtures
-   within the same scope.
-4. ``f3``: is a ``function``-scoped fixture, required by ``f1``: it needs to be instantiated at this point
-5. ``f1``: is the first ``function``-scoped fixture in ``test_foo`` parameter list.
-6. ``f2``: is the last ``function``-scoped fixture in ``test_foo`` parameter list.
+1. ``s1``: 是最大范围的fixture (``session``)。
+2. ``m1``: 是范围第二大的fixture (``module``)。
+3. ``a1``: 是 ``function`` 范围的带有 ``autouse`` 的fixture，它将比同一范围内的其他fixtures优先实例化。
+4. ``f3``: 是 ``function`` 范围的fixture，被 ``f1`` 依赖，此时需要实例化它。
+5. ``f1``: 是 ``test_foo`` 参数列表中的第一个 ``function`` 范围的fixture。
+6. ``f2``: 是 ``test_foo`` 参数列表中的最后一个 ``function`` 范围的fixture。
 
 
 .. _`finalization`:
