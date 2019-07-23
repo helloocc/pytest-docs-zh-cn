@@ -2,7 +2,7 @@
 .. _fixtures:
 .. _`fixture functions`:
 
-pytest fixtures: 显示，模块化，可扩展
+pytest fixtures: 显式，模块化，可扩展
 ========================================================
 
 .. currentmodule:: _pytest.python
@@ -118,18 +118,16 @@ Fixtures使得测试函数可以轻松地接受和处理特定的预初始化应
 ``conftest.py``: 共享fixture函数
 ------------------------------------------
 
-如果在实现测试期间，您希望在多个测试文件中使用同一个fixture函数，您可以将它移动到
-``conftest.py`` 文件中。
-您不需要在测试文件中导入fixture，它会自动被pytest发现。fixture函数的发现从测试类开始，
-然后是测试模块，接着是 ``conftest.py`` 文件，最后是内置和第三方插件。
+如果在实现测试期间，您希望在多个测试文件中使用同一个fixture函数，您可以将它移动到 ``conftest.py`` 文件中。
+您不需要在测试文件中导入fixture，它会自动被pytest发现。fixture函数的发现从测试类开始，然后是测试模块，
+接着是 ``conftest.py`` 文件，最后是内置和第三方插件。
 
 您还可以使用 ``conftest.py`` 文件来实现 :ref:`本地目录插件 <conftest.py plugins>` 。
 
 共享测试数据
 -----------------
 
-如果您想让测试用例从文件中获取测试数据，那么将这些数据加载到fixture中不失为一个好主意。
-这利用了pytest的自动缓存机制。
+如果您想让测试用例从文件中获取测试数据，那么将这些数据加载到fixture中不失为一个好主意。这利用了pytest的自动缓存机制。
 
 另一个方法是在 ``tests`` 文件夹中添加测试数据。此外，社区插件也可用于管理这方面的测试，例如：
 `pytest-datadir <https://pypi.org/project/pytest-datadir/>`__ 和
@@ -148,8 +146,7 @@ Scope：在测试类、模块或会话间共享fixture实例
 因此，测试模块中的多个测试函数将接收同一个fixture实例 ``smtp_connection`` 。对于 ``scope`` 可能的值有：
 ``function``, ``class``, ``module``, ``package`` 或 ``session`` 。
 
-下一个例子将fixture函数放入单独的 ``conftest.py`` 文件中，所以目录内多个测试模块中的测试用例都可以访问
-fixture函数::
+下一个例子将fixture函数放入单独的 ``conftest.py`` 文件中，所以目录内多个测试模块中的测试用例都可以访问fixture函数::
 
     # content of conftest.py
     import pytest
@@ -159,8 +156,8 @@ fixture函数::
     def smtp_connection():
         return smtplib.SMTP("smtp.gmail.com", 587, timeout=5)
 
-fixture的名字仍是 ``smtp_connection`` ，您可以在任何测试或fixture函数中（ ``conftest.py`` 所在目录中或目录下）
-将 ``smtp_connection`` 作为入参来访问它的结果::
+fixture的名字仍是 ``smtp_connection`` ，您可以在任何测试或fixture函数中（ ``conftest.py`` 所在目录中或目录下）将
+``smtp_connection`` 作为入参来访问它的结果::
 
     # content of test_module.py
 
@@ -214,9 +211,9 @@ fixture的名字仍是 ``smtp_connection`` ，您可以在任何测试或fixture
     test_module.py:11: AssertionError
     ========================= 2 failed in 0.12 seconds =========================
 
-您可以看到两个 ``assert 0`` 失败了，更重要的是您还可以看到相同的（模块范围） ``smtp_connection`` 对象
-被传入两个测试函数中，因为pytest在回溯中显示入参值。因此，使用 ``smtp_connection`` 的两个测试函数
-运行速度和单个测试函数一样快，因为它们重用了相同的实例。
+您可以看到两个 ``assert 0`` 失败了，更重要的是您还可以看到相同的（模块范围） ``smtp_connection``
+对象被传入两个测试函数中，因为pytest在回溯中显示入参值。因此，使用 ``smtp_connection`` 的两个测试函数运行速度和单个测试函数一样快，
+因为它们重用了相同的实例。
 
 如果您决定要使用会话范围的 ``smtp_connection`` 实例，只需要声明如下：
 
@@ -240,7 +237,7 @@ fixture的名字仍是 ``smtp_connection`` ，您可以在任何测试或fixture
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-在pytest 3.7中，引入了 ``package`` 范围。当测试用例的最后一个 *包* 完成时，包范围的fixtures结束。
+在pytest 3.7中，引入了 ``package`` 范围。当测试用例的最后一个 *包* 完成时，包范围的fixtures终止。
 
 .. warning::
     该功能被认为是 **实验性** 的，如果在更多使用该功能后，发现了隐藏情况或严重问题，则该功能可能在未来版本中被删除。
@@ -253,8 +250,9 @@ fixture的名字仍是 ``smtp_connection`` ，您可以在任何测试或fixture
 ----------------------------------------------------
 
 
-在请求功能函数时，首先实例化范围更大的fixture（例如 ``session`` ），而不是范围较小的fixtures（例如
-``function`` 或 ``class`` ）。相同范围的fixture，其相对顺序遵循测试函数中的声明顺序和fixtures间的荣誉依赖关系。
+在请求功能函数时，首先实例化范围更大的fixture（例如 ``session`` ），而不是范围较小的fixtures（例如 ``function`` 或 ``class`` ）。
+具有相同范围的fixture，其相对顺序遵循测试函数中的声明顺序和fixtures间的依赖关系。Autouse
+的fixture将会在显式使用fixture前被实例化。
 
 请考虑如下代码：
 
@@ -272,12 +270,11 @@ fixture的名字仍是 ``smtp_connection`` ，您可以在任何测试或fixture
 
 .. _`finalization`:
 
-Fixture finalization / executing teardown code
+Fixture终止/执行teardown代码
 -------------------------------------------------------------
 
-pytest supports execution of fixture specific finalization code
-when the fixture goes out of scope.  By using a ``yield`` statement instead of ``return``, all
-the code after the *yield* statement serves as the teardown code:
+pytest支持fixture在超出范围时执行特定的终结代码。通过使用 ``yield`` 语句代替 ``return`` ，则
+*yield* 之后的所有代码都作为teardown代码：
 
 .. code-block:: python
 
@@ -294,11 +291,9 @@ the code after the *yield* statement serves as the teardown code:
         print("teardown smtp")
         smtp_connection.close()
 
-The ``print`` and ``smtp.close()`` statements will execute when the last test in
-the module has finished execution, regardless of the exception status of the
-tests.
+不管测试有任何异常状态， ``print`` 和 ``smtp.close()`` 语句都将在该模块的最后一个测试用例完成时执行。
 
-Let's execute it:
+让我们执行它：
 
 .. code-block:: pytest
 
@@ -307,14 +302,11 @@ Let's execute it:
 
     2 failed in 0.12 seconds
 
-We see that the ``smtp_connection`` instance is finalized after the two
-tests finished execution.  Note that if we decorated our fixture
-function with ``scope='function'`` then fixture setup and cleanup would
-occur around each single test.  In either case the test
-module itself does not need to change or know about these details
-of fixture setup.
+我们看到 ``smtp_connection`` 实例是在两个测试用例完成后结束的。注意，如果我们用 ``scope='function'``
+装饰fixture函数，那么每个测试用例前后都会进行fixture的设置和清理。无论在哪种情况下，
+测试模块自身都无需修改或了解fixture设置的细节。
 
-Note that we can also seamlessly use the ``yield`` syntax with ``with`` statements:
+注意，我们还可以无缝地将 ``yield`` 语法和 ``with`` 语句结合使用。
 
 .. code-block:: python
 
@@ -330,13 +322,12 @@ Note that we can also seamlessly use the ``yield`` syntax with ``with`` statemen
             yield smtp_connection  # provide the fixture value
 
 
-The ``smtp_connection`` connection will be closed after the test finished
-execution because the ``smtp_connection`` object automatically closes when
-the ``with`` statement ends.
+``smtp_connection`` 连接将在测试执行完毕后关闭，因为当 ``with`` 语句结束时， ``smtp_connection``
+对象自动关闭。
 
-Using the contextlib.ExitStack context manager finalizers will always be called
-regardless if the fixture *setup* code raises an exception. This is handy to properly
-close all resources created by a fixture even if one of them fails to be created/acquired:
+无论fixture的 *setup* 代码是否引发异常，都将始终调用contextlib.ExitStack上下文管理终结器。
+这对于正确关闭所有由fixture创建的资源非常方便，即使其中某个资源的创建/获取失败:
+
 
 .. code-block:: python
 
@@ -354,17 +345,13 @@ close all resources created by a fixture even if one of them fails to be created
         with contextlib.ExitStack() as stack:
             yield [stack.enter_context(connect(port)) for port in ("C1", "C3", "C28")]
 
-In the example above, if ``"C28"`` fails with an exception, ``"C1"`` and ``"C3"`` will still
-be properly closed.
+在上面的例子中，即使 ``"C28"`` 异常失败， ``"C1"`` 和 ``"C3"`` 仍会正确关闭。
 
-Note that if an exception happens during the *setup* code (before the ``yield`` keyword), the
-*teardown* code (after the ``yield``) will not be called.
+注意，如果在 *setup* 代码（在 ``yield`` 关键字之前）期间发生异常，则不会调用 *teardown* 代码（在 ``yield`` 关键字之后）。
 
-An alternative option for executing *teardown* code is to
-make use of the ``addfinalizer`` method of the `request-context`_ object to register
-finalization functions.
+另一个替代方案是使用 `request-context`_ 对象的 ``addfinalizer`` 方法去注册终结函数，用来执行 *teardown* 代码。
 
-Here's the ``smtp_connection`` fixture changed to use ``addfinalizer`` for cleanup:
+下面是 ``smtp_connection`` fixture使用 ``addfinalizer`` 进行清理：
 
 .. code-block:: python
 
@@ -385,7 +372,7 @@ Here's the ``smtp_connection`` fixture changed to use ``addfinalizer`` for clean
         return smtp_connection  # provide the fixture value
 
 
-Here's the ``equipments`` fixture changed to use ``addfinalizer`` for cleanup:
+下面是 ``equipments`` fixture使用 ``addfinalizer`` 进行清理：
 
 .. code-block:: python
 
@@ -410,20 +397,17 @@ Here's the ``equipments`` fixture changed to use ``addfinalizer`` for cleanup:
         return r
 
 
-Both ``yield`` and ``addfinalizer`` methods work similarly by calling their code after the test
-ends. Of course, if an exception happens before the finalize function is registered then it
-will not be executed.
+``yield`` 和 ``addfinalizer`` 的工作原理类似，都是在测试结束后调用它们的代码。当然，如果在终止函数注册之前发生异常，
+则不会执行它。
 
 
 .. _`request-context`:
 
-Fixtures can introspect the requesting test context
+Fixtures能内省请求的测试上下文
 -------------------------------------------------------------
 
-Fixture functions can accept the :py:class:`request <FixtureRequest>` object
-to introspect the "requesting" test function, class or module context.
-Further extending the previous ``smtp_connection`` fixture example, let's
-read an optional server URL from the test module which uses our fixture::
+Fixture函数可以接受 :py:class:`request <FixtureRequest>` 对象来内省"请求"的测试函数，类或模块的上下文。
+进一步扩展前面的 ``smtp_connection`` fixture例子，让我们从使用该fixture的测试模块中读取一个可选的服务器URL::
 
     # content of conftest.py
     import pytest
@@ -437,9 +421,7 @@ read an optional server URL from the test module which uses our fixture::
         print("finalizing %s (%s)" % (smtp_connection, server))
         smtp_connection.close()
 
-We use the ``request.module`` attribute to optionally obtain an
-``smtpserver`` attribute from the test module.  If we just execute
-again, nothing much has changed:
+我们使用 ``request.module`` 属性从测试模块中获取 ``smtpserver`` 可选的属性。如果我们再次执行，没有太大变化：
 
 .. code-block:: pytest
 
@@ -448,8 +430,7 @@ again, nothing much has changed:
 
     2 failed in 0.12 seconds
 
-Let's quickly create another test module that actually sets the
-server URL in its module namespace::
+让我们快速创建另外一个测试模块，它在自己的模块命名空间中设置服务器URL::
 
     # content of test_anothersmtp.py
 
@@ -458,7 +439,7 @@ server URL in its module namespace::
     def test_showhelo(smtp_connection):
         assert 0, smtp_connection.helo()
 
-Running it:
+执行它：
 
 .. code-block:: pytest
 
@@ -473,20 +454,17 @@ Running it:
     ------------------------- Captured stdout teardown -------------------------
     finalizing <smtplib.SMTP object at 0xdeadbeef> (mail.python.org)
 
-voila! The ``smtp_connection`` fixture function picked up our mail server name
-from the module namespace.
+瞧！ ``smtp_connection`` fixture函数从模块命名空间中获取到邮件服务器名称。
 
 .. _`fixture-factory`:
 
-Factories as fixtures
+工厂fixtures
 -------------------------------------------------------------
 
-The "factory as fixture" pattern can help in situations where the result
-of a fixture is needed multiple times in a single test. Instead of returning
-data directly, the fixture instead returns a function which generates the data.
-This function can then be called multiple times in the test.
+"工厂fixture"模式有助于单个测试用例多次使用fixture的场景。fixture不是直接返回数据，
+而是返回一个生成数据的函数。该函数可以在测试用例中被调用多次。
 
-Factories can have have parameters as needed::
+工厂可以有参数::
 
     @pytest.fixture
     def make_customer_record():
@@ -505,7 +483,7 @@ Factories can have have parameters as needed::
         customer_2 = make_customer_record("Mike")
         customer_3 = make_customer_record("Meredith")
 
-If the data created by the factory requires managing, the fixture can take care of that::
+如果需要管理工厂创建的数据，fixture可以处理::
 
     @pytest.fixture
     def make_customer_record():
@@ -531,20 +509,14 @@ If the data created by the factory requires managing, the fixture can take care 
 
 .. _`fixture-parametrize`:
 
-Parametrizing fixtures
+参数化fixtures
 -----------------------------------------------------------------
 
-Fixture functions can be parametrized in which case they will be called
-multiple times, each time executing the set of dependent tests, i. e. the
-tests that depend on this fixture.  Test functions usually do not need
-to be aware of their re-running.  Fixture parametrization helps to
-write exhaustive functional tests for components which themselves can be
-configured in multiple ways.
+参数化的fixture函数可以被多次调用，每次执行一组依赖测试，即依赖于这个fixture的测试。
+测试函数通常不需要注意重新运行的情况。Fixture参数化可以通过多种方式配置，有助于为组件编写详尽的功能测试。
 
-Extending the previous example, we can flag the fixture to create two
-``smtp_connection`` fixture instances which will cause all tests using the fixture
-to run twice.  The fixture function gets access to each parameter
-through the special :py:class:`request <FixtureRequest>` object::
+扩展之前的例子，我们可以标记fixture来创建两个 ``smtp_connection`` fixture实例，这将导致所有使用该fixture
+的测试用例都运行两次。fixture函数通过特殊的 :py:class:`request <FixtureRequest>` 对象访问每个参数::
 
     # content of conftest.py
     import pytest
@@ -558,11 +530,8 @@ through the special :py:class:`request <FixtureRequest>` object::
         print("finalizing %s" % smtp_connection)
         smtp_connection.close()
 
-The main change is the declaration of ``params`` with
-:py:func:`@pytest.fixture <_pytest.python.fixture>`, a list of values
-for each of which the fixture function will execute and can access
-a value via ``request.param``.  No test function code needs to change.
-So let's just do another run:
+主要的变化是使用 :py:func:`@pytest.fixture <_pytest.python.fixture>` 声明 ``params`` ，
+fixture函数的取值列表都将会执行，并可以通过  ``request.param`` 访问某个取值。不需要更改任何测试函数代码，我们再来一次:
 
 .. code-block:: pytest
 
@@ -620,23 +589,15 @@ So let's just do another run:
     finalizing <smtplib.SMTP object at 0xdeadbeef>
     4 failed in 0.12 seconds
 
-We see that our two test functions each ran twice, against the different
-``smtp_connection`` instances.  Note also, that with the ``mail.python.org``
-connection the second test fails in ``test_ehlo`` because a
-different server string is expected than what arrived.
+我们看到两个测试函数分别针对不同的 ``smtp_connection`` 实例运行了两次。还要注意，使用
+``mail.python.org`` 连接， ``test_ehlo`` 的第二次测试失败了，因为预期的服务器字符串与实际的不一致。
 
-pytest will build a string that is the test ID for each fixture value
-in a parametrized fixture, e.g. ``test_ehlo[smtp.gmail.com]`` and
-``test_ehlo[mail.python.org]`` in the above examples.  These IDs can
-be used with ``-k`` to select specific cases to run, and they will
-also identify the specific case when one is failing.  Running pytest
-with ``--collect-only`` will show the generated IDs.
+pytest会为每个参数化fixture中的fixture值构建一个测试ID字符串，例如上面例子中的
+``test_ehlo[smtp.gmail.com]`` 和 ``test_ehlo[mail.python.org]`` 。这些ID可以与 ``-k`` 结合使用，用于选择特定的用例来运行。
+pytest带有 ``--collect-only`` 运行时，会显示生成的ID。
 
-Numbers, strings, booleans and None will have their usual string
-representation used in the test ID. For other objects, pytest will
-make a string based on the argument name.  It is possible to customise
-the string used in a test ID for a certain fixture value by using the
-``ids`` keyword argument::
+数字、字符串、布尔值和 None 将在测试ID中使用它们通常的字符串表示形式。
+对于其他对象，pytest将基于参数名创建一个字符串。可以使用 ``ids`` 关键字参数为某个fixture值定制测试ID中使用的字符串::
 
    # content of test_ids.py
    import pytest
@@ -661,12 +622,10 @@ the string used in a test ID for a certain fixture value by using the
    def test_b(b):
        pass
 
-The above shows how ``ids`` can be either a list of strings to use or
-a function which will be called with the fixture value and then
-has to return a string to use.  In the latter case if the function
-return ``None`` then pytest's auto-generated ID will be used.
+上面展示了 ``ids`` 可以是要使用的字符串列表，也可以是使用fixture值并返回字符串的函数。
+在后一种情况下，如果函数返回 ``None`` ，则使用pytest自动生成的ID。
 
-Running the above tests results in the following test IDs being used:
+运行以上测试，得到测试ID如下:
 
 .. code-block:: pytest
 
