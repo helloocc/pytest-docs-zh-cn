@@ -21,7 +21,7 @@ fixtures较经典xUnit风格的setup/teardown功能有了显著改进:
 * fixture以模块化的方式实现，因为每个fixture名称都触发一个 *fixture函数*，该函数本身可以使用其他fixture。
 
 * fixture管理从简单的单元扩展到复杂的功能测试，允许根据配置和组件选项对fixture和测试进行参数化，
-  或者在函数、类、模块及整个测试会话范围内重用fixtures。
+  或者在函数、类、模块及整个测试会话作用域内重用fixtures。
 
 此外，pytest继续支持 :ref:`经典xunit setup <xunitsetup>` 。您可以混合使用这两种样式，根据您的喜好从经典样式逐渐过渡到新样式。
 您也可以从现有的 :ref:`unittest.TestCase样式 <unittest.TestCase>` 或 :ref:`基于nose <nosestyle>` 开始。
@@ -106,7 +106,7 @@ Fixture函数通过标记 :py:func:`@pytest.fixture <_pytest.python.fixture>` �
 
     查看可用的fixtures（只有添加 ``-v`` 选项，才能显示以 ``_`` 开头的fixture）
 
-Fixtures: 依赖注入的典型
+Fixtures: 典型的依赖注入
 ---------------------------------------------------
 
 Fixtures使得测试函数可以轻松地接受和处理特定的预初始化应用程序对象，而不必关心导入/设置/清理的细节。
@@ -135,7 +135,7 @@ Fixtures使得测试函数可以轻松地接受和处理特定的预初始化应
 
 .. _smtpshared:
 
-Scope：在测试类、模块或会话间共享fixture实例
+Scope: 在测试类、模块或会话间共享fixture实例
 ----------------------------------------------------------------------------
 
 .. regendoc:wipe
@@ -211,11 +211,11 @@ fixture的名字仍是 ``smtp_connection`` ，您可以在任何测试或fixture
     test_module.py:11: AssertionError
     ========================= 2 failed in 0.12 seconds =========================
 
-您可以看到两个 ``assert 0`` 失败了，更重要的是您还可以看到相同的（模块范围） ``smtp_connection``
+您可以看到两个 ``assert 0`` 失败了，更重要的是您还可以看到相同的（模块作用域） ``smtp_connection``
 对象被传入两个测试函数中，因为pytest在回溯中显示入参值。因此，使用 ``smtp_connection`` 的两个测试函数运行速度和单个测试函数一样快，
 因为它们重用了相同的实例。
 
-如果您决定要使用会话范围的 ``smtp_connection`` 实例，只需要声明如下：
+如果您决定要使用会话作用域的 ``smtp_connection`` 实例，只需要声明如下：
 
 .. code-block:: python
 
@@ -225,19 +225,19 @@ fixture的名字仍是 ``smtp_connection`` ，您可以在任何测试或fixture
         # all tests needing it
         ...
 
-最后， ``class`` 范围的fixture将会在每个测试 *类* 中被调用一次。
+最后， ``class`` 作用域的fixture将会在每个测试 *类* 中被调用一次。
 
 .. note::
 
     Pytest每次只缓存一个fixture实例。
-    这意味着当使用参数化的fixture时，pytest可以在指定范围内多次调用fixture。
+    这意味着当使用参数化的fixture时，pytest可以在指定作用域内多次调用fixture。
 
 
-``package`` 范围 (实验性)
+``package`` 作用域 (实验性)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-在pytest 3.7中，引入了 ``package`` 范围。当测试用例的最后一个 *包* 完成时，包范围的fixtures终止。
+在pytest 3.7中，引入了 ``package`` 作用域。当测试用例的最后一个 *包* 完成时，包作用域的fixtures终止。
 
 .. warning::
     该功能被认为是 **实验性** 的，如果在更多使用该功能后，发现了隐藏情况或严重问题，则该功能可能在未来版本中被删除。
@@ -246,12 +246,12 @@ fixture的名字仍是 ``smtp_connection`` ，您可以在任何测试或fixture
 
 
 
-顺序：首先实例化范围更大的fixture
+顺序：首先实例化作用域更大的fixture
 ----------------------------------------------------
 
 
-在请求功能函数时，首先实例化范围更大的fixture（例如 ``session`` ），而不是范围较小的fixtures（例如 ``function`` 或 ``class`` ）。
-具有相同范围的fixture，其相对顺序遵循测试函数中的声明顺序和fixtures间的依赖关系。Autouse
+在请求功能函数时，首先实例化作用域更大的fixture（例如 ``session`` ），而不是作用域较小的fixtures（例如 ``function`` 或 ``class`` ）。
+具有相同作用域的fixture，其相对顺序遵循测试函数中的声明顺序和fixtures间的依赖关系。Autouse
 的fixture将会在显式使用fixture前被实例化。
 
 请考虑如下代码：
@@ -260,12 +260,12 @@ fixture的名字仍是 ``smtp_connection`` ，您可以在任何测试或fixture
 
 ``test_foo`` 请求的fixtures，将按照以下顺序实例化：
 
-1. ``s1``: 是最大范围的fixture (``session``)。
-2. ``m1``: 是范围第二大的fixture (``module``)。
-3. ``a1``: 是 ``function`` 范围的带有 ``autouse`` 的fixture，它将比同一范围内的其他fixtures优先实例化。
-4. ``f3``: 是 ``function`` 范围的fixture，被 ``f1`` 依赖，此时需要实例化它。
-5. ``f1``: 是 ``test_foo`` 参数列表中的第一个 ``function`` 范围的fixture。
-6. ``f2``: 是 ``test_foo`` 参数列表中的最后一个 ``function`` 范围的fixture。
+1. ``s1``: 是作用域最大的fixture (``session``)。
+2. ``m1``: 是作用域第二大的fixture (``module``)。
+3. ``a1``: 是 ``function`` 作用域的带有 ``autouse`` 的fixture，它将比同一作用域内的其他fixtures优先实例化。
+4. ``f3``: 是 ``function`` 作用域的fixture，被 ``f1`` 依赖，此时需要实例化它。
+5. ``f1``: 是 ``test_foo`` 参数列表中的第一个 ``function`` 作用域的fixture。
+6. ``f2``: 是 ``test_foo`` 参数列表中的最后一个 ``function`` 作用域的fixture。
 
 
 .. _`finalization`:
@@ -273,7 +273,7 @@ fixture的名字仍是 ``smtp_connection`` ，您可以在任何测试或fixture
 Fixture终止/执行teardown代码
 -------------------------------------------------------------
 
-pytest支持fixture在超出范围时执行特定的终结代码。通过使用 ``yield`` 语句代替 ``return`` ，则
+pytest支持fixture在超出作用域时执行特定的终结代码。通过使用 ``yield`` 语句代替 ``return`` ，则
 *yield* 之后的所有代码都作为teardown代码：
 
 .. code-block:: python
@@ -403,10 +403,10 @@ pytest支持fixture在超出范围时执行特定的终结代码。通过使用 
 
 .. _`request-context`:
 
-Fixtures能内省请求的测试上下文
+Fixtures可以获取请求的测试上下文
 -------------------------------------------------------------
 
-Fixture函数可以接受 :py:class:`request <FixtureRequest>` 对象来内省"请求"的测试函数，类或模块的上下文。
+Fixture函数可以接受 :py:class:`request <FixtureRequest>` 对象来获取"请求"的测试函数，类或模块的上下文。
 进一步扩展前面的 ``smtp_connection`` fixture例子，让我们从使用该fixture的测试模块中读取一个可选的服务器URL::
 
     # content of conftest.py
@@ -458,10 +458,10 @@ Fixture函数可以接受 :py:class:`request <FixtureRequest>` 对象来内省"�
 
 .. _`fixture-factory`:
 
-工厂fixtures
+工厂化fixtures
 -------------------------------------------------------------
 
-"工厂fixture"模式有助于单个测试用例多次使用fixture的场景。fixture不是直接返回数据，
+"工厂化fixture"模式有助于单个测试用例多次使用fixture的场景。fixture不是直接返回数据，
 而是返回一个生成数据的函数。该函数可以在测试用例中被调用多次。
 
 工厂可以有参数::
@@ -622,7 +622,7 @@ pytest带有 ``--collect-only`` 运行时，会显示生成的ID。
    def test_b(b):
        pass
 
-上面展示了 ``ids`` 可以是要使用的字符串列表，也可以是使用fixture值并返回字符串的函数。
+上面展示了 ``ids`` 可以是要使用的字符串列表，也可以是根据fixture值返回字符串的函数。
 在后一种情况下，如果函数返回 ``None`` ，则使用pytest自动生成的ID。
 
 运行以上测试，得到测试ID如下:
@@ -653,13 +653,12 @@ pytest带有 ``--collect-only`` 运行时，会显示生成的ID。
 
 .. _`fixture-parametrize-marks`:
 
-Using marks with parametrized fixtures
+标记参数化的fixtures
 --------------------------------------
 
-:func:`pytest.param` can be used to apply marks in values sets of parametrized fixtures in the same way
-that they can be used with :ref:`@pytest.mark.parametrize <@pytest.mark.parametrize>`.
+:func:`pytest.param` 可用于在参数化fixtures的值中应用标记，其方式与 :ref:`@pytest.mark.parametrize <@pytest.mark.parametrize>` 相同。
 
-Example::
+示例::
 
     # content of test_fixture_marks.py
     import pytest
@@ -670,7 +669,7 @@ Example::
     def test_data(data_set):
         pass
 
-Running this test will *skip* the invocation of ``data_set`` with value ``2``:
+运行测试时，会 *跳过* 值为 ``2`` 的 ``data_set`` 。
 
 .. code-block:: pytest
 
@@ -689,15 +688,13 @@ Running this test will *skip* the invocation of ``data_set`` with value ``2``:
 
 .. _`interdependent fixtures`:
 
-Modularity: using fixtures from a fixture function
+模块化: 使用fixture函数中的fixtures
 ----------------------------------------------------------
 
-You can not only use fixtures in test functions but fixture functions
-can use other fixtures themselves.  This contributes to a modular design
-of your fixtures and allows re-use of framework-specific fixtures across
-many projects.  As a simple example, we can extend the previous example
-and instantiate an object ``app`` where we stick the already defined
-``smtp_connection`` resource into it::
+您不仅可以在测试函数中使用fixture，fixture函数本身也可以使用其他fixture。
+这有助于fixture的模块化设计，并允许在多个项目中复用特定框架的fixtures。
+我们扩展之前的例子作为一个简单的示例，首先实例化一个 ``app`` 对象，并将已经定义好的 ``smtp_connection``
+对象插入其中::
 
     # content of test_appsetup.py
 
@@ -714,8 +711,8 @@ and instantiate an object ``app`` where we stick the already defined
     def test_smtp_connection_exists(app):
         assert app.smtp_connection
 
-Here we declare an ``app`` fixture which receives the previously defined
-``smtp_connection`` fixture and instantiates an ``App`` object with it.  Let's run it:
+这里我们声明一个 ``app`` fixture，它接收前面定义的 ``smtp_connection`` fixture，并使用它实例化一个 ``App`` 对象。
+让我们运行:
 
 .. code-block:: pytest
 
@@ -731,35 +728,28 @@ Here we declare an ``app`` fixture which receives the previously defined
 
     ========================= 2 passed in 0.12 seconds =========================
 
-Due to the parametrization of ``smtp_connection``, the test will run twice with two
-different ``App`` instances and respective smtp servers.  There is no
-need for the ``app`` fixture to be aware of the ``smtp_connection``
-parametrization because pytest will fully analyse the fixture dependency graph.
+由于 ``smtp_connection`` 的参数化，测试将会在两个不同的 ``App`` 实例和各自的smtp服务器上分别运行一次。
+``app`` fixture不需要知道 ``smtp_connection`` 的参数化，因为pytest会完整分析该fixture的依赖关系图。
 
-Note that the ``app`` fixture has a scope of ``module`` and uses a
-module-scoped ``smtp_connection`` fixture.  The example would still work if
-``smtp_connection`` was cached on a ``session`` scope: it is fine for fixtures to use
-"broader" scoped fixtures but not the other way round:
-A session-scoped fixture could not use a module-scoped one in a
-meaningful way.
+注意， ``app`` fixture的作用域是 ``module`` ，并使用了模块作用域的 ``smtp_connection`` fixture。
+如果 ``smtp_connection`` 缓存在 ``session`` 作用域，该示例仍然有效。fixture可以使用"更广阔"的作用域fixture，
+但反过来不行：会话作用域的fixture不能使用模块作用域的fixture。
 
 
 .. _`automatic per-resource grouping`:
 
-Automatic grouping of tests by fixture instances
+根据fixture实例自动化分组测试
 ----------------------------------------------------------
 
 .. regendoc: wipe
 
-pytest minimizes the number of active fixtures during test runs.
-If you have a parametrized fixture, then all the tests using it will
-first execute with one instance and then finalizers are called
-before the next fixture instance is created.  Among other things,
-this eases testing of applications which create and use global state.
+在测试运行期间，pytest对活动fixture的数量采取最小化。如果您有一个参数化的fixture，
+那么所有使用它的测试用例都先使用同一个实例执行，然后在下一个fixture实例创建之前调用终结器。
+除此之外，还简化了创建和使用全局状态的应用程序的测试。
 
-The following example uses two parametrized fixtures, one of which is
-scoped on a per-module basis, and all the functions perform ``print`` calls
-to show the setup/teardown flow::
+
+下面的例子使用了两个参数化的fixtures，其中一个是基于模块作用域，所有的函数都执行 ``print``
+来显示setup/teardown流程::
 
     # content of test_module.py
     import pytest
@@ -786,7 +776,7 @@ to show the setup/teardown flow::
         print("  RUN test2 with otherarg %s and modarg %s" % (otherarg, modarg))
 
 
-Let's run the tests in verbose mode and with looking at the print-output:
+让我们在详细模式下运行测试，并查看打印输出:
 
 .. code-block:: pytest
 
@@ -832,33 +822,26 @@ Let's run the tests in verbose mode and with looking at the print-output:
 
     ========================= 8 passed in 0.12 seconds =========================
 
-You can see that the parametrized module-scoped ``modarg`` resource caused an
-ordering of test execution that lead to the fewest possible "active" resources.
-The finalizer for the ``mod1`` parametrized resource was executed before the
-``mod2`` resource was setup.
+您可以看到，参数化模块作用域的 ``modarg`` 资源影响了测试执行顺序，从而减少可能的"活动"资源。
+参数化 ``mod1`` 资源的终结器在 ``mod2`` 资源的setup之前执行。
 
-In particular notice that test_0 is completely independent and finishes first.
-Then test_1 is executed with ``mod1``, then test_2 with ``mod1``, then test_1
-with ``mod2`` and finally test_2 with ``mod2``.
+特别注意，test_0是完全独立的，并且第一个结束。然后使用 ``mod1`` 执行test_1，然后使用 ``mod1``
+执行test_2，然后使用 ``mod2`` 执行test_1，最后使用 ``mod2`` 执行test_2。
 
-The ``otherarg`` parametrized resource (having function scope) was set up before
-and teared down after every test that used it.
+参数化 ``otherarg`` 资源（具有函数作用域）在每个使用它的测试之前 *setup* ，
+测试之后 *teardown* 。
 
 
 .. _`usefixtures`:
 
-Using fixtures from classes, modules or projects
+从类、模块或项目中使用fixtures
 ----------------------------------------------------------------------
 
 .. regendoc:wipe
 
-Sometimes test functions do not directly need access to a fixture object.
-For example, tests may require to operate with an empty directory as the
-current working directory but otherwise do not care for the concrete
-directory.  Here is how you can use the standard `tempfile
-<http://docs.python.org/library/tempfile.html>`_ and pytest fixtures to
-achieve it.  We separate the creation of the fixture into a conftest.py
-file::
+有时测试函数不需要直接访问fixture对象。例如，测试用例可能需要将一个空目录作为当前工作目录进行操作，而不关心具体使用的目录。
+下面展示如何使用标准的 `tempfile <http://docs.python.org/library/tempfile.html>`_ 和pytest fixture来实现。
+我们将fixture的创建分离到conftest.py文件中::
 
     # content of conftest.py
 
@@ -871,7 +854,7 @@ file::
         newpath = tempfile.mkdtemp()
         os.chdir(newpath)
 
-and declare its use in a test module via a ``usefixtures`` marker::
+并在测试模块中通过 ``usefixtures`` 标记声明它的用法::
 
     # content of test_setenv.py
     import os
@@ -887,10 +870,8 @@ and declare its use in a test module via a ``usefixtures`` marker::
         def test_cwd_again_starts_empty(self):
             assert os.listdir(os.getcwd()) == []
 
-Due to the ``usefixtures`` marker, the ``cleandir`` fixture
-will be required for the execution of each test method, just as if
-you specified a "cleandir" function argument to each of them.  Let's run it
-to verify our fixture is activated and the tests pass:
+因为使用了 ``usefixtures`` 标记，每个测试方法的执行都需要 ``cleandir`` fixture，
+就好像您为每个测试函数指定了入参"cleandir"一样。让我们运行它，来验证每个fixture都被激活且测试通过:
 
 .. code-block:: pytest
 
@@ -898,7 +879,7 @@ to verify our fixture is activated and the tests pass:
     ..                                                                   [100%]
     2 passed in 0.12 seconds
 
-You can specify multiple fixtures like this:
+您可以像这样指定多个fixtures:
 
 .. code-block:: python
 
@@ -906,18 +887,16 @@ You can specify multiple fixtures like this:
     def test():
         ...
 
-and you may specify fixture usage at the test module level, using
-a generic feature of the mark mechanism:
+您也可以使用标记机制的通用特性，在测试模块级别指定fixture的使用情况：
+
 
 .. code-block:: python
 
     pytestmark = pytest.mark.usefixtures("cleandir")
 
-Note that the assigned variable *must* be called ``pytestmark``, assigning e.g.
-``foomark`` will not activate the fixtures.
+注意，指定的变量 *必须* 叫作 ``pytestmark`` ，如果指定 ``foomark`` 将不会激活fixtures。
 
-It is also possible to put fixtures required by all tests in your project
-into an ini-file:
+也可以将项目中所有测试所需的fixtures放入一个ini文件中：
 
 .. code-block:: ini
 
@@ -928,8 +907,7 @@ into an ini-file:
 
 .. warning::
 
-    Note this mark has no effect in **fixture functions**. For example,
-    this **will not work as expected**:
+    注意，此标记对 **fixture函数** 没有影响。举例说明，这 **将不会符合预期** ：
 
     .. code-block:: python
 
@@ -938,24 +916,20 @@ into an ini-file:
         def my_fixture_that_sadly_wont_use_my_other_fixture():
             ...
 
-    Currently this will not generate any error or warning, but this is intended
-    to be handled by `#3664 <https://github.com/pytest-dev/pytest/issues/3664>`_.
+    目前，这不会产生任何错误或警告，但这将由  `#3664 <https://github.com/pytest-dev/pytest/issues/3664>`_ 处理。
 
 
 .. _`autouse`:
 .. _`autouse fixtures`:
 
-Autouse fixtures (xUnit setup on steroids)
+自动使用fixtures
 ----------------------------------------------------------------------
 
 .. regendoc:wipe
 
-Occasionally, you may want to have fixtures get invoked automatically
-without declaring a function argument explicitly or a `usefixtures`_ decorator.
-As a practical example, suppose we have a database fixture which has a
-begin/rollback/commit architecture and we want to automatically surround
-each test method by a transaction and a rollback.  Here is a dummy
-self-contained implementation of this idea::
+有时，您可能希望自动调用fixture，而无需显式声明函数参数或使用 `usefixtures`_ 装饰器。
+举一个实际的例子，假如我们有一个数据库fixture，它有开始/回滚/提交体系架构，
+并且我们希望每个测试方法都能执行事务和回滚。以下是这个想法的仿真实现::
 
     # content of test_db_transact.py
 
@@ -986,12 +960,10 @@ self-contained implementation of this idea::
         def test_method2(self, db):
             assert db.intransaction == ["test_method2"]
 
-The class-level ``transact`` fixture is marked with *autouse=true*
-which implies that all test methods in the class will use this fixture
-without a need to state it in the test function signature or with a
-class-level ``usefixtures`` decorator.
+类级别的 ``transact`` fixture使用了 *autouse=true* 标记，这意味着类中所有的测试方法都将使用这个fixture，
+而不需要在测试函数签名中声明它，或使用类级别的 ``usefixtures`` 装饰器。
 
-If we run it, we get two passing tests:
+如果我们运行它，可以得到两个通过的测试用例：
 
 .. code-block:: pytest
 
@@ -999,29 +971,21 @@ If we run it, we get two passing tests:
     ..                                                                   [100%]
     2 passed in 0.12 seconds
 
-Here is how autouse fixtures work in other scopes:
+下面是自动使用的fixtures在其他作用域的工作原理：
 
-- autouse fixtures obey the ``scope=`` keyword-argument: if an autouse fixture
-  has ``scope='session'`` it will only be run once, no matter where it is
-  defined. ``scope='class'`` means it will be run once per class, etc.
+- 自动使用的fixtures遵循 ``scope=`` 关键字参数：如果一个自动使用的fixture具有 ``scope='session'`` ，
+  那么无论它在哪里定义，都将只运行一次。 ``scope='class'`` 意味着它将在每个类中运行一次，等等。
 
-- if an autouse fixture is defined in a test module, all its test
-  functions automatically use it.
+- 如果在测试模块中定义了自动使用的fixture，那么所有的测试函数都会自动地使用它。
 
-- if an autouse fixture is defined in a conftest.py file then all tests in
-  all test modules below its directory will invoke the fixture.
+- 如果在conftest.py文件中定义了一个自动使用的fixture，那么目录下所有测试模块中的测试用例都将调用该fixture。
 
-- lastly, and **please use that with care**: if you define an autouse
-  fixture in a plugin, it will be invoked for all tests in all projects
-  where the plugin is installed.  This can be useful if a fixture only
-  anyway works in the presence of certain settings e. g. in the ini-file.  Such
-  a global fixture should always quickly determine if it should do
-  any work and avoid otherwise expensive imports or computation.
+- 最后， **请谨慎使用** ：如果您在插件中定义了一个自动使用的fixture，那么所有安装插件的项目中的测试都将调用fixture。
+  如果fixture只在某些设置(例如在ini文件中)存在的情况下有效，那么这将非常有用。
+  应当快速决定全局fixture是否应该做全部工作，并避免其它高昂的导入或计算。
 
-Note that the above ``transact`` fixture may very well be a fixture that
-you want to make available in your project without having it generally
-active.  The canonical way to do that is to put the transact definition
-into a conftest.py file **without** using ``autouse``::
+注意，上面的 ``transact`` fixture很可能是您希望在项目中使用，但无需自动激活的一个fixture。
+规范的方法是将事务定义放入conftest.py文件中，而不是使用 ``autouse`` ::
 
     # content of conftest.py
     @pytest.fixture
@@ -1030,27 +994,24 @@ into a conftest.py file **without** using ``autouse``::
         yield
         db.rollback()
 
-and then e.g. have a TestClass using it by declaring the need::
+例如：有一个TestClass通过声明来使用它::
 
     @pytest.mark.usefixtures("transact")
     class TestClass(object):
         def test_method1(self):
             ...
 
-All test methods in this TestClass will use the transaction fixture while
-other test classes or functions in the module will not use it unless
-they also add a ``transact`` reference.
+这个TestClass中的所有测试方法都将使用该事务fixture，而模块中的其他测试类或函数则不会使用它，除非它们也添加了 ``transact`` 引用。
 
-Overriding fixtures on various levels
+覆盖不同级别的fixturees
 -------------------------------------
 
-In relatively large test suite, you most likely need to ``override`` a ``global`` or ``root`` fixture with a ``locally``
-defined one, keeping the test code readable and maintainable.
+在相对较大的测试套件中，您可能需要用 ``locally`` 定义的fixture覆盖 ``global`` 或 ``root`` fixture，以保持测试代码的可读性和可维护性。
 
-Override a fixture on a folder (conftest) level
+覆盖文件夹(conftest)级别fixture
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Given the tests file structure is:
+给定测试文件结构如下：
 
 ::
 
@@ -1086,14 +1047,15 @@ Given the tests file structure is:
                 def test_username(username):
                     assert username == 'overridden-username'
 
-As you can see, a fixture with the same name can be overridden for certain test folder level.
-Note that the ``base`` or ``super`` fixture can be accessed from the ``overriding``
-fixture easily - used in the example above.
+可以看到，fixture可以被测试文件夹级别的同名fixture覆盖。从以上的示例中，
+可以发现 ``overriding`` 的fixture可以轻松访问 ``base`` 或 ``super`` 的fixture。
 
-Override a fixture on a test module level
+
+覆盖测试模块级别fixture
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Given the tests file structure is:
+给定测试文件结构如下：
+
 
 ::
 
@@ -1130,13 +1092,12 @@ Given the tests file structure is:
             def test_username(username):
                 assert username == 'overridden-else-username'
 
-In the example above, a fixture with the same name can be overridden for certain test module.
+在上述示例中，fixture可以被测试模块中的同名fixture覆盖。
 
 
-Override a fixture with direct test parametrization
+使用参数化测试直接覆盖fixture
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Given the tests file structure is:
+给定测试文件结构如下：
 
 ::
 
@@ -1167,14 +1128,14 @@ Given the tests file structure is:
             def test_username_other(other_username):
                 assert other_username == 'other-directly-overridden-username-other'
 
-In the example above, a fixture value is overridden by the test parameter value. Note that the value of the fixture
-can be overridden this way even if the test doesn't use it directly (doesn't mention it in the function prototype).
+在上述示例中，fixture值被测试参数值覆盖。注意，即使测试没有直接使用fixture值（在函数原型中没有提到），
+也可以用这种方式覆盖fixture值。
 
 
-Override a parametrized fixture with non-parametrized one and vice versa
+使用非参数化覆盖参数化fixture，反之亦然
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Given the tests file structure is:
+给定测试文件结构如下：
 
 ::
 
@@ -1219,6 +1180,5 @@ Given the tests file structure is:
             def test_username(non_parametrized_username):
                 assert non_parametrized_username == 'username'
 
-In the example above, a parametrized fixture is overridden with a non-parametrized version, and
-a non-parametrized fixture is overridden with a parametrized version for certain test module.
-The same applies for the test folder level obviously.
+在上述示例中，参数化fixture被非参数化fixture覆盖，而非参数化fixture又被特定测试模块的参数化版本覆盖。
+显然，测试文件夹级别也是如此。
