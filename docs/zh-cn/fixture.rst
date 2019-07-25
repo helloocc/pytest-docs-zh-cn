@@ -246,7 +246,7 @@ fixture的名字仍是 ``smtp_connection`` ，您可以在任何测试或fixture
 
 
 
-顺序：首先实例化作用域更大的fixture
+顺序: 首先实例化作用域更大的fixture
 ----------------------------------------------------
 
 
@@ -653,7 +653,7 @@ pytest带有 ``--collect-only`` 运行时，会显示生成的ID。
 
 .. _`fixture-parametrize-marks`:
 
-标记参数化的fixtures
+标记参数化fixtures
 --------------------------------------
 
 :func:`pytest.param` 可用于在参数化fixtures的值中应用标记，其方式与 :ref:`@pytest.mark.parametrize <@pytest.mark.parametrize>` 相同。
@@ -929,7 +929,7 @@ pytest带有 ``--collect-only`` 运行时，会显示生成的ID。
 
 有时，您可能希望自动调用fixture，而无需显式声明函数参数或使用 `usefixtures`_ 装饰器。
 举一个实际的例子，假如我们有一个数据库fixture，它有开始/回滚/提交体系架构，
-并且我们希望每个测试方法都能执行事务和回滚。以下是这个想法的仿真实现::
+并且我们希望每个测试方法都能执行事务和回滚。以下是这个想法的模拟实现::
 
     # content of test_db_transact.py
 
@@ -985,7 +985,9 @@ pytest带有 ``--collect-only`` 运行时，会显示生成的ID。
   应当快速决定全局fixture是否应该做全部工作，并避免其它高昂的导入或计算。
 
 注意，上面的 ``transact`` fixture很可能是您希望在项目中使用，但无需自动激活的一个fixture。
-规范的方法是将事务定义放入conftest.py文件中，而不是使用 ``autouse`` ::
+规范的方法是将事务定义放入conftest.py文件中，而不是使用 ``autouse`` :
+
+::
 
     # content of conftest.py
     @pytest.fixture
@@ -994,7 +996,7 @@ pytest带有 ``--collect-only`` 运行时，会显示生成的ID。
         yield
         db.rollback()
 
-例如：有一个TestClass通过声明来使用它::
+例如，有一个TestClass通过声明来使用它::
 
     @pytest.mark.usefixtures("transact")
     class TestClass(object):
@@ -1003,7 +1005,7 @@ pytest带有 ``--collect-only`` 运行时，会显示生成的ID。
 
 这个TestClass中的所有测试方法都将使用该事务fixture，而模块中的其他测试类或函数则不会使用它，除非它们也添加了 ``transact`` 引用。
 
-覆盖不同级别的fixturees
+覆盖不同级别的fixtures
 -------------------------------------
 
 在相对较大的测试套件中，您可能需要用 ``locally`` 定义的fixture覆盖 ``global`` 或 ``root`` fixture，以保持测试代码的可读性和可维护性。
