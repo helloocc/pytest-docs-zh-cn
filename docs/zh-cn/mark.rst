@@ -1,35 +1,29 @@
 .. _mark:
 
-Marking test functions with attributes
+使用属性标记测试函数
 ======================================
 
-By using the ``pytest.mark`` helper you can easily set
-metadata on your test functions. There are
-some builtin markers, for example:
+通过使用 ``pytest.mark`` ，您可以在测试函数上轻松地设置元数据。有一些内置标记，例如：
 
-* :ref:`skip <skip>` - always skip a test function
-* :ref:`skipif <skipif>` - skip a test function if a certain condition is met
-* :ref:`xfail <xfail>` - produce an "expected failure" outcome if a certain
-  condition is met
-* :ref:`parametrize <parametrizemark>` to perform multiple calls
-  to the same test function.
+* :ref:`skip <skip>` - 总是跳过测试函数
+* :ref:`skipif <skipif>` - 如果满足某个条件，则跳过测试函数
+* :ref:`xfail <xfail>` - 如果满足某个条件，则产生"预期失败"结果
+* :ref:`parametrize <parametrizemark>` - 对同一测试函数执行多次调用
 
-It's easy to create custom markers or to apply markers
-to whole test classes or modules. Those markers can be used by plugins, and also
-are commonly used to :ref:`select tests <mark run>` on the command-line with the ``-m`` option.
+我们可以很容易创建自定义标记，或将标记应用于整个测试类/模块。这些标记可以由插件使用，
+通常也用于命令行中 ``-m`` 选项来 :ref:`选择测试 <mark run>` 。
 
-See :ref:`mark examples` for examples which also serve as documentation.
+请参阅 :ref:`mark examples` 查看标记的示例和文档。
 
 .. note::
 
-    Marks can only be applied to tests, having no effect on
-    :ref:`fixtures <fixtures>`.
+    标记只能应用于测试，对 :ref:`fixtures <fixtures>` 不起作用。
 
 
-Registering marks
+注册标记
 -----------------
 
-You can register custom marks in your ``pytest.ini`` file like this:
+您可以在 ``pytest.ini`` 文件中注册自定义标记，如下所示：
 
 .. code-block:: ini
 
@@ -38,10 +32,9 @@ You can register custom marks in your ``pytest.ini`` file like this:
         slow: marks tests as slow (deselect with '-m "not slow"')
         serial
 
-Note that everything after the ``:`` is an optional description.
+注意， ``:`` 之后的所有内容都是可选说明。
 
-Alternatively, you can register new markers programatically in a
-:ref:`pytest_configure <initialization-hooks>` hook:
+或者，您可以在 :ref:`pytest_configure <initialization-hooks>` 钩子中程序化注册新标记：
 
 .. code-block:: python
 
@@ -51,23 +44,19 @@ Alternatively, you can register new markers programatically in a
         )
 
 
-Registered marks appear in pytest's help text and do not emit warnings (see the next section). It
-is recommended that third-party plugins always :ref:`register their markers <registering-markers>`.
+注册标记出现在pytest的帮助文本中，不会产生警告（请参阅下一节）。建议第三方插件始终 :ref:`注册其标记 <registering-markers>`
 
 .. _unknown-marks:
 
-Raising errors on unknown marks
+对未知标记提出错误
 -------------------------------
 
-Unregistered marks applied with the ``@pytest.mark.name_of_the_mark`` decorator
-will always emit a warning in order to avoid silently doing something
-surprising due to mis-typed names. As described in the previous section, you can disable
-the warning for custom marks by registering them in your ``pytest.ini`` file or
-using a custom ``pytest_configure`` hook.
+使用 ``@pytest.mark.name_of_the_mark`` 装饰器应用未注册标记总是会发出警告，以避免由于名称键入错误而导致的意外操作。
+如前一节所述，可以通过在 ``pytest.ini`` 文件中注册自定义的标记，或使用 ``pytest_configure`` 钩子来禁用警告。
 
-When the ``--strict-markers`` command-line flag is passed, any unknown marks applied
-with the ``@pytest.mark.name_of_the_mark`` decorator will trigger an error. You can
-enforce this validation in your project by adding ``--strict-markers`` to ``addopts``:
+
+当使用 ``--strict-markers`` 命令行标志时， 任何使用 ``@pytest.mark.name_of_the_mark`` 装饰器的未知标记都将触发一个错误。
+您可以通过在 ``addopts`` 里面添加 ``--strict-marker`` 在项目中验证：
 
 .. code-block:: ini
 
