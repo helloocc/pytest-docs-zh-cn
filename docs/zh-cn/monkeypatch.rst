@@ -1,17 +1,14 @@
 
-Monkeypatching/mocking modules and environments
+Monkeypatching/mocking模块和环境
 ================================================================
 
 .. currentmodule:: _pytest.monkeypatch
 
-Sometimes tests need to invoke functionality which depends
-on global settings or which invokes code which cannot be easily
-tested such as network access.  The ``monkeypatch`` fixture
-helps you to safely set/delete an attribute, dictionary item or
-environment variable, or to modify ``sys.path`` for importing.
+有时，测试需要调用依赖全局设置的功能，或者不方便测试的代码（如网络访问）。
+使用 ``monkeypatch`` fixture可以安全地设置/删除属性、字典项和环境变量，或者修改导入的 ``sys.path`` 。
 
-The ``monkeypatch`` fixture provides these helper methods for safely patching and mocking
-functionality in tests:
+
+``monkeypatch`` fixture为测试中安全地修改和模拟功能测试提供了方法：
 
 .. code-block:: python
 
@@ -24,51 +21,37 @@ functionality in tests:
     monkeypatch.syspath_prepend(path)
     monkeypatch.chdir(path)
 
-All modifications will be undone after the requesting
-test function or fixture has finished. The ``raising``
-parameter determines if a ``KeyError`` or ``AttributeError``
-will be raised if the target of the set/deletion operation does not exist.
+所有修改都将在请求的测试函数或fixture完成后撤销。 ``raising`` 参数决定了如果设置/删除操作的目标不存在时，
+是否会引发 ``KeyError`` 或 ``AttributeError`` 。
 
-Consider the following scenarios:
+考虑以下场景：
 
-1. Modifying the behavior of a function or the property of a class for a test e.g.
-there is an API call or database connection you will not make for a test but you know
-what the expected output should be. Use :py:meth:`monkeypatch.setattr` to patch the
-function or property with your desired testing behavior. This can include your own functions.
-Use :py:meth:`monkeypatch.delattr` to remove the function or property for the test.
+1. 为测试修改函数的行为或类的属性。例如，您不会对某个API调用或数据库连接进行测试，但知道预期的输出应该是什么。
+   使用 :py:meth:`monkeypatch.setattr` 为您想要的测试行为来修补函数或属性，这可以包括您自己的函数。
+   使用 :py:meth:`monkeypatch.delattr` 删除测试的函数或属性。
 
-2. Modifying the values of dictionaries e.g. you have a global configuration that
-you want to modify for certain test cases. Use :py:meth:`monkeypatch.setitem` to patch the
-dictionary for the test. :py:meth:`monkeypatch.delitem` can be used to remove items.
+2. 修改字典的值。例如，您想为某些测试用例修改一个全局配置项。使用 :py:meth:`monkeypatch.setitem` 为测试修补字典，
+   使用 :py:meth:`monkeypatch.delitem` 删除字典项。
 
-3. Modifying environment variables for a test e.g. to test program behavior if an
-environment variable is missing, or to set multiple values to a known variable.
-:py:meth:`monkeypatch.setenv` and :py:meth:`monkeypatch.delenv` can be used for
-these patches.
+3. 为测试修改环境变量。例如，测试缺少环境变量时，或已知变量设定多个值时的程序行为。
+   可以对这些补丁使用 :py:meth:`monkeypatch.setenv` 和 :py:meth:`monkeypatch.delenv` 。
 
-4. Use :py:meth:`monkeypatch.syspath_prepend` to modify the system ``$PATH`` safely, and
-:py:meth:`monkeypatch.chdir` to change the context of the current working directory
-during a test.
+4. 使用 :py:meth:`monkeypatch.syspath_prepend` 安全地修改系统 ``$PATH`` ，使用 :py:meth:`monkeypatch.chdir`
+   在测试期间更改当前工作目录的上下文。
 
-See the `monkeypatch blog post`_ for some introduction material
-and a discussion of its motivation.
+参阅 `monkeypatch blog post`_ 查看介绍材料和讨论。
 
 .. _`monkeypatch blog post`: http://tetamap.wordpress.com/2009/03/03/monkeypatching-in-unit-tests-done-right/
 
-Simple example: monkeypatching functions
+简单示例：monkeypatching函数
 ----------------------------------------
 
-Consider a scenario where you are working with user directories. In the context of
-testing, you do not want your test to depend on the running user. ``monkeypatch``
-can be used to patch functions dependent on the user to always return a
-specific value.
+考虑一个使用用户目录的场景。在测试上下文中，您不希望测试依赖于正在运行的用户。
+``monkeypatch`` 可以对依赖于用户的函数进行修补，始终返回特定值。
 
-In this example, :py:meth:`monkeypatch.setattr` is used to patch ``Path.home``
-so that the known testing path ``Path("/abc")`` is always used when the test is run.
-This removes any dependency on the running user for testing purposes.
-:py:meth:`monkeypatch.setattr` must be called before the function which will use
-the patched function is called.
-After the test function finishes the ``Path.home`` modification will be undone.
+在该示例中， :py:meth:`monkeypatch.setattr` 用于修补 ``Path.home`` ，从而在运行测试时始终使用已知的测试路径 ``Path("/abc")`` 。
+这消除了测试对于运行用户的依赖性。必须在使用补丁函数之前调用 :py:meth:`monkeypatch.setattr` ，
+测试函数完成后， ``Path.home`` 的修改将被撤销。
 
 .. code-block:: python
 
@@ -96,12 +79,11 @@ After the test function finishes the ``Path.home`` modification will be undone.
         x = getssh()
         assert x == Path("/abc/.ssh")
 
-Monkeypatching returned objects: building mock classes
+Monkeypatching返回对象：构建mock类
 ------------------------------------------------------
 
-:py:meth:`monkeypatch.setattr` can be used in conjunction with classes to mock returned
-objects from functions instead of values.
-Imagine a simple function to take an API url and return the json response.
+:py:meth:`monkeypatch.setattr` 可以与类一起使用，mock对象替代函数的返回值。
+设想一个接收API url并返回json响应的简单函数。
 
 .. code-block:: python
 
@@ -114,9 +96,8 @@ Imagine a simple function to take an API url and return the json response.
         r = requests.get(url)
         return r.json()
 
-We need to mock ``r``, the returned response object for testing purposes.
-The mock of ``r`` needs a ``.json()`` method which returns a dictionary.
-This can be done in our test file by defining a class to represent ``r``.
+我们需要mock返回的响应对象 ``r`` 来进行测试，Mock的 ``r`` 需要一个 ``.json()`` 方法，该方法返回一个字典。
+我们可以在测试文件中定义一个代表 ``r`` 的类。
 
 .. code-block:: python
 
@@ -153,17 +134,13 @@ This can be done in our test file by defining a class to represent ``r``.
         assert result["mock_key"] == "mock_response"
 
 
-``monkeypatch`` applies the mock for ``requests.get`` with our ``mock_get`` function.
-The ``mock_get`` function returns an instance of the ``MockResponse`` class, which
-has a ``json()`` method defined to return a known testing dictionary and does not
-require any outside API connection.
+``monkeypatch`` 通过 ``mock_get`` 函数对 ``requests.get`` 进行mock。
+``mock_get`` 函数返回一个 ``MockResponse`` 类的实例，该类定义了一个返回已知测试字典的 ``json()`` 方法，且不需要连接任何外部的API。
 
-You can build the ``MockResponse`` class with the appropriate degree of complexity for
-the scenario you are testing. For instance, it could include an ``ok`` property that
-always returns ``True``, or return different values from the ``json()`` mocked method
-based on input strings.
+您可以为正在测试的场景构建复杂度适当的 ``MockResponse`` 类。例如，它可以包含一个总是返回 ``True`` 的 ``ok`` 属性，
+或者基于输入字符串从mock的 ``json()`` 方法中返回不同的值。
 
-This mock can be shared across tests using a ``fixture``:
+使用 ``fixture`` 可以在测试中共享这个mock。
 
 .. code-block:: python
 
@@ -198,15 +175,13 @@ This mock can be shared across tests using a ``fixture``:
         assert result["mock_key"] == "mock_response"
 
 
-Furthermore, if the mock was designed to be applied to all tests, the ``fixture`` could
-be moved to a ``conftest.py`` file and use the with ``autouse=True`` option.
+此外，如果希望mock应用于所有测试，可以将 ``fixture`` 移动到 ``conftest.py`` 中，并使用 ``autouse=True`` 选项。
 
 
-Global patch example: preventing "requests" from remote operations
+全局补丁示例：防止远程操作的"requests"
 ------------------------------------------------------------------
 
-If you want to prevent the "requests" library from performing http
-requests in all your tests, you can do:
+如果您想防止"requests"库在所有测试中执行http请求，您可以：
 
 .. code-block:: python
 
@@ -219,23 +194,18 @@ requests in all your tests, you can do:
         """Remove requests.sessions.Session.request for all tests."""
         monkeypatch.delattr("requests.sessions.Session.request")
 
-This autouse fixture will be executed for each test function and it
-will delete the method ``request.session.Session.request``
-so that any attempts within tests to create http requests will fail.
+每个测试函数都会执行这个autouse的fixture，它将删除 ``request.session.Session`` 方法，所以任何尝试在测试中创建http的请求都将失败。
 
 
 .. note::
 
-    Be advised that it is not recommended to patch builtin functions such as ``open``,
-    ``compile``, etc., because it might break pytest's internals. If that's
-    unavoidable, passing ``--tb=native``, ``--assert=plain`` and ``--capture=no`` might
-    help although there's no guarantee.
+    建议不要对内置函数（如 ``open`` 、``compile`` 等）进行修补，因为这可能会破坏pytest的内部机制。
+    如果无法避免，增加 ``--tb=native``, ``--assert=plain`` 和 ``--capture=no`` 可能会有所帮助，但不能保证。
 
 .. note::
 
-    Mind that patching ``stdlib`` functions and some third-party libraries used by pytest
-    might break pytest itself, therefore in those cases it is recommended to use
-    :meth:`MonkeyPatch.context` to limit the patching to the block you want tested:
+    注意，修补 ``stdlib`` 函数和pytest使用的某些三方库可能会破坏pytest。
+    因此，建议使用 ``MonkeyPatch.context()`` 将修补限制在您想要测试的代码块：
 
     .. code-block:: python
 
@@ -247,15 +217,15 @@ so that any attempts within tests to create http requests will fail.
                 m.setattr(functools, "partial", 3)
                 assert functools.partial == 3
 
-    See issue `#3290 <https://github.com/pytest-dev/pytest/issues/3290>`_ for details.
+    详细信息请参阅 `#3290 <https://github.com/pytest-dev/pytest/issues/3290>`_ 。
 
 
-Monkeypatching environment variables
+Monkeypatching环境变量
 ------------------------------------
 
-If you are working with environment variables you often need to safely change the values
-or delete them from the system for testing purposes. ``monkeypatch`` provides a mechanism
-to do this using the ``setenv`` and ``delenv`` method. Our example code to test:
+如果您正在处理环境变量，为了测试的目的，您经常需要安全地更改这些值或从系统中删除它们。monkeypatch提供了一种使用setenv和delenv方法实现这一点的机制。我们要测试的示例代码:
+出于测试的目的，您可能需要从系统中安全地修改或删除环境变量。 ``monkeypatch`` 通过 ``setenv`` 和 ``delenv`` 方法实现该机制。
+测试示例代码：
 
 .. code-block:: python
 
@@ -273,9 +243,8 @@ to do this using the ``setenv`` and ``delenv`` method. Our example code to test:
 
         return username.lower()
 
-There are two potential paths. First, the ``USER`` environment variable is set to a
-value. Second, the ``USER`` environment variable does not exist. Using ``monkeypatch``
-both paths can be safely tested without impacting the running environment:
+有两种可能性：一、环境变量 ``USER`` 被设定值。二、环境变量 ``USER`` 不存在。
+使用 ``monkeypatch`` 可以安全地测试这两种情况，而不影响运行环境。
 
 .. code-block:: python
 
@@ -296,7 +265,7 @@ both paths can be safely tested without impacting the running environment:
         with pytest.raises(EnvironmentError):
             _ = get_os_user_lower()
 
-This behavior can be moved into ``fixture`` structures and shared across tests:
+这个行为可以移动到 ``fixture`` 中，并在测试间共享。
 
 .. code-block:: python
 
@@ -324,11 +293,10 @@ This behavior can be moved into ``fixture`` structures and shared across tests:
             _ = get_os_user_lower()
 
 
-Monkeypatching dictionaries
+Monkeypatching字典
 ---------------------------
 
-:py:meth:`monkeypatch.setitem` can be used to safely set the values of dictionaries
-to specific values during tests. Take this simplified connection string example:
+使用 :py:meth:`monkeypatch.setitem` 可以在测试期间安全地将字典的值设为特定值。以这个简化的连接字符串为例：
 
 .. code-block:: python
 
@@ -341,7 +309,7 @@ to specific values during tests. Take this simplified connection string example:
         config = config or DEFAULT_CONFIG
         return f"User Id={config['user']}; Location={config['database']};"
 
-For testing purposes we can patch the ``DEFAULT_CONFIG`` dictionary to specific values.
+出于测试的目的，可以将字典 ``DEFAULT_CONFIG`` 修补为特定的值。
 
 .. code-block:: python
 
@@ -364,7 +332,7 @@ For testing purposes we can patch the ``DEFAULT_CONFIG`` dictionary to specific 
         result = app.create_connection_string()
         assert result == expected
 
-You can use the :py:meth:`monkeypatch.delitem` to remove values.
+可以使用 ``monkeypatch.delitem()`` 删除值。
 
 .. code-block:: python
 
@@ -386,8 +354,7 @@ You can use the :py:meth:`monkeypatch.delitem` to remove values.
             _ = app.create_connection_string()
 
 
-The modularity of fixtures gives you the flexibility to define
-separate fixtures for each potential mock and reference them in the needed tests.
+Fixture的模块化使您能够灵活地为每个mock单独定义fixture，并在测试中引用它们。
 
 .. code-block:: python
 
@@ -433,7 +400,7 @@ separate fixtures for each potential mock and reference them in the needed tests
 
 .. currentmodule:: _pytest.monkeypatch
 
-API Reference
+API参考
 -------------
 
-Consult the docs for the :class:`MonkeyPatch` class.
+查阅 :class:`MonkeyPatch` 的文档。
